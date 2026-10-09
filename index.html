@@ -98,6 +98,10 @@
             { id: 'PR-2026-003', date: '2026-08-04', department: 'F&B', requester: 'Chloe Frazer', priority: 'Urgent', status: 'Converted to PO', total: 3200.00, items: [{ desc: 'Commercial Coffee Beans', qty: 4, price: 800 }] }
         ];
 
+        let prFormItems = [
+            { desc: '', qty: 1, unit: 'pcs', category: 'IT Hardware', price: 0 }
+        ];
+
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('aside button[id^="nav-"]').forEach(btn => btn.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white");
@@ -113,10 +117,10 @@
                 title.innerText = "Dashboard & Purchase Requisitions";
                 container.innerHTML = `
                     <div class="grid grid-cols-4 gap-4 mb-6">
-                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Total Requisitions</p><h3 class="text-2xl font-bold mt-1">3 <span class="text-xs text-emerald-400">+12% MoM</span></h3></div>
-                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Pending Approvals</p><h3 class="text-2xl font-bold mt-1 text-amber-400">1 <span class="text-xs text-gray-400">Requires Action</span></h3></div>
-                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Ready for PO Conversion</p><h3 class="text-2xl font-bold mt-1 text-indigo-400">1 <span class="text-xs text-gray-400">Purchasing Dept</span></h3></div>
-                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Total PR Value</p><h3 class="text-2xl font-bold mt-1 text-emerald-400">₱10,490.00</h3></div>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Total Requisitions</p><h3 class="text-2xl font-bold mt-1">${prList.length} <span class="text-xs text-emerald-400">+12% MoM</span></h3></div>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Pending Approvals</p><h3 class="text-2xl font-bold mt-1 text-amber-400">${prList.filter(p=>p.status==='Pending Approval').length} <span class="text-xs text-gray-400">Requires Action</span></h3></div>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Ready for PO Conversion</p><h3 class="text-2xl font-bold mt-1 text-indigo-400">${prList.filter(p=>p.status==='Approved').length} <span class="text-xs text-gray-400">Purchasing Dept</span></h3></div>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl"><p class="text-xs text-gray-400">Total PR Value</p><h3 class="text-2xl font-bold mt-1 text-emerald-400">₱${prList.reduce((acc,curr)=>acc+curr.total,0).toLocaleString(undefined, {minimumFractionDigits:2})}</h3></div>
                     </div>
                     <div class="bg-gray-800/60 border border-gray-700/50 rounded-xl p-6">
                         <div class="flex justify-between items-center mb-4">
@@ -151,6 +155,92 @@
                         </table>
                     </div>
                 `;
+            } else if(currentTab === 'create-pr') {
+                title.innerText = "Create Purchase Requisition";
+                let calcTotal = prFormItems.reduce((acc, item) => acc + (Number(item.qty) * Number(item.price)), 0);
+                container.innerHTML = `
+                    <div class="bg-gray-800/60 border border-gray-700/50 rounded-xl p-6 max-w-5xl mx-auto">
+                        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                            <div>
+                                <h3 class="font-bold text-white text-lg">New Purchase Requisition Form</h3>
+                                <p class="text-xs text-gray-400">Fill in department details and line items for multi-tier approval routing.</p>
+                            </div>
+                            <button onclick="switchTab('dashboard')" class="text-gray-400 hover:text-white text-sm bg-gray-700/50 px-3 py-1.5 rounded"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-xs text-gray-400 uppercase font-semibold mb-1">Department</label>
+                                <select id="pr-dept" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+                                    <option>IT</option>
+                                    <option>Finance</option>
+                                    <option>Purchasing</option>
+                                    <option>F&B</option>
+                                    <option>Housekeeping</option>
+                                    <option>Engineering Materials</option>
+                                    <option>Executive</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 uppercase font-semibold mb-1">Priority Level</label>
+                                <select id="pr-priority" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+                                    <option>Normal</option>
+                                    <option>High</option>
+                                    <option>Urgent</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 uppercase font-semibold mb-1">Required Delivery Date</label>
+                                <input type="date" id="pr-date" value="2026-08-15" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider">Line Items</h4>
+                                <button onclick="addPrRow()" class="bg-indigo-600/30 border border-indigo-500 text-indigo-300 hover:bg-indigo-600 hover:text-white px-3 py-1 rounded text-xs font-semibold">+ Add Line Item</button>
+                            </div>
+                            <table class="w-full text-left border-collapse">
+                               <thead>
+                                    <tr class="border-b border-gray-700 text-xs text-gray-400 uppercase">
+                                        <th class="py-2 px-3">Item Description</th>
+                                        <th class="py-2 px-3 w-24">Qty</th>
+                                        <th class="py-2 px-3 w-28">Unit</th>
+                                        <th class="py-2 px-3 w-40">Category</th>
+                                        <th class="py-2 px-3 w-32">Est. Price (₱)</th>
+                                        <th class="py-2 px-3 w-32 text-right">Line Total</th>
+                                        <th class="py-2 px-3 w-16 text-center">Action</th>
+                                    </tr>
+                               </thead>
+                               <tbody class="divide-y divide-gray-700/50 text-sm">
+                                    ${prFormItems.map((item, idx) => `
+                                        <tr>
+                                            <td class="py-2 px-3"><input type="text" value="${item.desc}" oninput="updatePrItem(${idx}, 'desc', this.value)" placeholder="Enter item description..." class="w-full bg-gray-900 border border-gray-700 rounded p-1.5 text-white text-xs"></td>
+                                            <td class="py-2 px-3"><input type="number" value="${item.qty}" min="1" oninput="updatePrItem(${idx}, 'qty', this.value)" class="w-full bg-gray-900 border border-gray-700 rounded p-1.5 text-white text-xs"></td>
+                                            <td class="py-2 px-3"><input type="text" value="${item.unit}" oninput="updatePrItem(${idx}, 'unit', this.value)" class="w-full bg-gray-900 border border-gray-700 rounded p-1.5 text-white text-xs"></td>
+                                            <td class="py-2 px-3">
+                                                <select oninput="updatePrItem(${idx}, 'category', this.value)" class="w-full bg-gray-900 border border-gray-700 rounded p-1.5 text-white text-xs">
+                                                    <option ${item.category==='IT Hardware'?'selected':''}>IT Hardware</option>
+                                                    <option ${item.category==='Office Supplies'?'selected':''}>Office Supplies</option>
+                                                    <option ${item.category==='F&B Ingredients'?'selected':''}>F&B Ingredients</option>
+                                                    <option ${item.category==='Housekeeping'?'selected':''}>Housekeeping</option>
+                                                    <option ${item.category==='Engineering'?'selected':''}>Engineering</option>
+                                                </select>
+                                            </td>
+                                            <td class="py-2 px-3"><input type="number" value="${item.price}" min="0" step="0.01" oninput="updatePrItem(${idx}, 'price', this.value)" class="w-full bg-gray-900 border border-gray-700 rounded p-1.5 text-white text-xs"></td>
+                                            <td class="py-2 px-3 text-right font-semibold text-white">₱${(Number(item.qty)*Number(item.price)).toFixed(2)}</td>
+                                            <td class="py-2 px-3 text-center"><button onclick="removePrRow(${idx})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button></td>
+                                        </tr>
+                                    `).join('')}
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-between items-center border-t border-gray-700 pt-4">
+                            <div class="text-lg font-bold text-white">Total Requisition Value: <span class="text-emerald-400">₱${calcTotal.toFixed(2)}</span></div>
+                            <button onclick="submitPr()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-indigo-600/30"><i class="fa-solid fa-paper-plane mr-2"></i> Submit for Approval</button>
+                        </div>
+                    </div>
+                `;
             } else if(currentTab === 'users') {
                 title.innerText = "User Management & Role Permissions";
                 container.innerHTML = `
@@ -164,101 +254,4 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-gray-700 text-xs text-gray-400 uppercase">
-                                    <th class="py-3 px-4">User ID / Username <button onclick="editColumn('id')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
-                                    <th class="py-3 px-4">Full Name <button onclick="editColumn('name')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
-                                    <th class="py-3 px-4">Department <button onclick="editColumn('department')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
-                                    <th class="py-3 px-4">Position / Role <button onclick="editColumn('role')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
-                                    <th class="py-3 px-4">Status</th>
-                                    <th class="py-3 px-4 text-right">Admin Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-700/50 text-sm">
-                                ${users.map(u => `
-                                    <tr class="hover:bg-gray-700/20">
-                                        <td class="py-3 px-4 font-medium text-indigo-400">
-                                            <span onclick="editField('${u.id}', 'id')" class="cursor-pointer hover:underline" title="Click to edit ID/Username">${u.id} (${u.username}) <i class="fa-solid fa-pen text-[10px] text-gray-500"></i></span>
-                                        </td>
-                                        <td class="py-3 px-4 text-white">
-                                            <span onclick="editField('${u.id}', 'name')" class="cursor-pointer hover:underline" title="Click to edit Name">${u.name} <i class="fa-solid fa-pen text-[10px] text-gray-500"></i></span>
-                                        </td>
-                                        <td class="py-3 px-4 text-gray-300">
-                                            <span onclick="editField('${u.id}', 'department')" class="cursor-pointer hover:underline" title="Click to edit Department">${u.department} <i class="fa-solid fa-pen text-[10px] text-gray-500"></i></span>
-                                        </td>
-                                        <td class="py-3 px-4 text-gray-300">
-                                            <span onclick="editField('${u.id}', 'role')" class="cursor-pointer hover:underline" title="Click to edit Role">${u.role} <i class="fa-solid fa-pen text-[10px] text-gray-500"></i></span>
-                                        </td>
-                                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-900/40 text-emerald-300">${u.status}</span></td>
-                                        <td class="py-3 px-4 text-right space-x-2">
-                                            <button onclick="editUserModal('${u.id}')" class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 hover:bg-indigo-600 hover:text-white px-2 py-1 rounded text-xs"><i class="fa-solid fa-pen-to-square"></i> Edit Row</button>
-                                            <button onclick="resetPassword('${u.id}')" class="bg-amber-600/30 border border-amber-500/50 text-amber-300 hover:bg-amber-600 hover:text-white px-2 py-1 rounded text-xs"><i class="fa-solid fa-key"></i></button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            } else {
-                title.innerText = "Module Placeholder";
-                container.innerHTML = `<div class="bg-gray-800/60 border border-gray-700/50 p-6 rounded-xl"><p class="text-gray-300">Module view loaded successfully.</p></div>`;
-            }
-        }
-
-        function editField(id, field) {
-            const user = users.find(u => u.id === id);
-            if(!user) return;
-            const newVal = prompt(`Edit ${field.toUpperCase()} for ${user.name}:`, user[field]);
-            if(newVal !== null && newVal.trim() !== '') {
-                user[field] = newVal.trim();
-                renderContent();
-                alert(`Successfully updated ${field} for user ${id}.`);
-            }
-        }
-
-        function editColumn(field) {
-            const fieldNames = { id: 'User ID / Username', name: 'Full Name', department: 'Department', role: 'Position / Role' };
-            const targetId = prompt(`Enter User ID (e.g. USR-001) whose ${fieldNames[field]} you want to update:`);
-            if(targetId) {
-                editField(targetId.trim(), field);
-            }
-        }
-
-        function editUserModal(id) {
-            const user = users.find(u => u.id === id);
-            if(!user) return;
-            const newId = prompt("Edit User ID / Username:", user.id);
-            const newName = prompt("Edit Full Name:", user.name);
-            const newDept = prompt("Edit Department:", user.department);
-            const newRole = prompt("Edit Position / Role:", user.role);
-            if(newId) user.id = newId;
-            if(newName) user.name = newName;
-            if(newDept) user.department = newDept;
-            if(newRole) user.role = newRole;
-            renderContent();
-            alert("User row successfully updated.");
-        }
-
-        function resetPassword(id) {
-            const user = users.find(u => u.id === id);
-            if(!user) return;
-            const newPwd = prompt(`Enter new temporary password for ${user.name} (${user.id}):`);
-            if(newPwd) {
-                alert(`Password successfully updated and issued for user ${user.id}.`);
-            }
-        }
-
-        function openRoleSwitcher() {
-            const role = prompt("Switch role / user:\n1. Alexander Vance (Head Admin)\n2. Marcus Brody (IT Head)\n3. Elena Fisher (Finance)\n4. Victor Sullivan (Purchasing)", "Head Admin");
-            if(role) {
-                currentUser.name = role;
-                document.getElementById('current-user-name').innerText = role;
-                alert("Active user role switched successfully.");
-            }
-        }
-
-        function toggleNotifications() { alert("No new notifications."); }
-
-        renderContent();
-    </script>
-</body>
-</html>
+                                    <th class="py-3 px-4">User ID / Username <button onclick="editColumn('id')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</
