@@ -1,1 +1,1967 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProcureFlow Enterprise Purchasing Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for Advanced Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        .watermark-original {
+            position: relative;
+        }
+        .watermark-original::after {
+            content: "ORIGINAL - AUTHORIZED VENDOR COPY";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 3rem;
+            font-weight: 800;
+            color: rgba(99, 102, 241, 0.08);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .watermark-reprint {
+            position: relative;
+        }
+        .watermark-reprint::after {
+            content: "REPRINT - OFFICE COPY ONLY (NOT VALID FOR VENDOR ISSUANCE)";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: rgba(239, 68, 68, 0.12);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-full font-sans antialiased overflow-hidden flex flex-col">
 
+    <div id="app" class="flex h-screen w-screen overflow-hidden">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside id="sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20 transition-all duration-300">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                        <i class="fa-solid fa-cube text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg tracking-tight text-white leading-tight">ProcureFlow</h1>
+                        <span class="text-xs text-indigo-400 font-medium">Enterprise Suite v4.2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">Main Menu</div>
+                <a href="#" onclick="switchTab('dashboard')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-indigo-600 text-white shadow-md shadow-indigo-600/20" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span>Dashboard / PR List</span>
+                </a>
+                <a href="#" onclick="switchTab('pr-create')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white" data-tab="pr-create">
+                    <i class="fa-solid fa-file-circle-plus w-5 text-center"></i>
+                    <span>Create Purchase Req</span>
+                </a>
+                <a href="#" onclick="switchTab('po-list')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white" data-tab="po-list">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
+                    <span>Purchase Orders</span>
+                </a>
+                <a href="#" onclick="switchTab('suppliers')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white" data-tab="suppliers">
+                    <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
+                    <span>Supplier & Catalog</span>
+                </a>
+                <a href="#" onclick="switchTab('analytics')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white" data-tab="analytics">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                    <span>Advanced Analytics</span>
+                </a>
+
+                <div class="pt-6">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">Administration</div>
+                    <a href="#" onclick="switchTab('users')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white" data-tab="users">
+                        <i class="fa-solid fa-users-gear w-5 text-center"></i>
+                        <span>User Management</span>
+                    </a>
+                    <a href="#" onclick="switchTab('audit')" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white" data-tab="audit">
+                        <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                        <span>Audit & Logs</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- User Quick Profile Footer -->
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div id="sidebar-user-avatar" class="h-9 w-9 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center shrink-0 border border-indigo-500/30">
+                        HA
+                    </div>
+                    <div class="truncate">
+                        <p id="sidebar-user-name" class="text-sm font-semibold text-white truncate">Head Administrator</p>
+                        <p id="sidebar-user-role" class="text-xs text-slate-400 truncate">Executive / Admin</p>
+                    </div>
+                </div>
+                <button onclick="openAccountSwitcher()" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors" title="Switch User / Account">
+                    <i class="fa-solid fa-right-left"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-950">
+            
+            <!-- TOP BAR -->
+            <header class="h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 z-10">
+                <div class="flex items-center space-x-4">
+                    <h2 id="current-page-title" class="text-xl font-bold text-white tracking-tight">Dashboard & Requisitions</h2>
+                    <span id="department-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">All Departments View</span>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications Dropdown Toggle -->
+                    <div class="relative">
+                        <button onclick="toggleNotificationsModal()" class="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+                            <i class="fa-regular fa-bell text-lg"></i>
+                            <span id="notification-badge" class="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center font-bold shadow-sm">3</span>
+                        </button>
+                    </div>
+
+                    <!-- Active User / Switcher Pill -->
+                    <div onclick="openAccountSwitcher()" class="flex items-center space-x-3 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 rounded-full py-1.5 px-3 cursor-pointer transition-all shadow-sm">
+                        <div id="topbar-user-avatar" class="h-7 w-7 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                            HA
+                        </div>
+                        <div class="text-left pr-1">
+                            <p id="topbar-user-name" class="text-xs font-semibold text-white leading-none">Head Admin</p>
+                            <p id="topbar-user-dept" class="text-[10px] text-indigo-300 leading-tight">Executive</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 ml-1"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- DYNAMIC VIEW CONTAINER -->
+            <div id="view-container" class="flex-1 overflow-y-auto p-6 bg-slate-950">
+                <!-- Tabs rendered here dynamically by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ACCOUNT SWITCHER / LOGIN MODAL -->
+    <div id="account-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Account & Role Switcher</h3>
+                    <p class="text-xs text-slate-400">Simulate logins across different departments and hierarchy</p>
+                </div>
+                <button onclick="closeAccountSwitcher()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="space-y-2">
+                    <label class="text-xs font-medium text-slate-300">Select Active User Role</label>
+                    <div id="account-list" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-800 flex justify-end space-x-3">
+                    <button onclick="closeAccountSwitcher()" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS MODAL -->
+    <div id="notifications-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-bell text-indigo-400"></i>
+                    <h3 class="text-lg font-bold text-white">System Notifications & Alerts</h3>
+                </div>
+                <button onclick="toggleNotificationsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="notifications-list" class="flex-1 overflow-y-auto p-6 space-y-3">
+                <!-- Populated by JS -->
+            </div>
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-between items-center">
+                <button onclick="markAllNotificationsRead()" class="text-xs text-indigo-400 hover:underline font-medium">Mark all as read</button>
+                <button onclick="toggleNotificationsModal()" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM MESSAGE / ALERT MODAL (Replaces window.alert) -->
+    <div id="alert-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
+            <div id="alert-icon-wrap" class="h-14 w-14 rounded-full bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center mb-4 text-2xl border border-indigo-500/30">
+                <i id="alert-icon" class="fa-solid fa-circle-info"></i>
+            </div>
+            <h4 id="alert-title" class="text-lg font-bold text-white mb-2">Notification</h4>
+            <p id="alert-message" class="text-sm text-slate-300 mb-6">Message goes here...</p>
+            <button onclick="closeCustomAlert()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-indigo-600/30">OK</button>
+        </div>
+    </div>
+
+    <!-- QUICK ADD SUPPLIER / ITEM MODAL (Modal shortcut inside forms) -->
+    <div id="quick-master-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <h3 id="quick-master-title" class="text-lg font-bold text-white">Add New Supplier / Item</h3>
+                <button onclick="closeQuickMasterModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="quick-master-body" class="p-6 space-y-4">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- IN-MEMORY STATE & DATABASES ---
+        let currentUser = {
+            id: "USR-001",
+            username: "headadmin",
+            firstName: "Alexander",
+            surname: "Vance",
+            department: "Executive",
+            role: "Head Admin",
+            status: "Active"
+        };
+
+        let usersList = [
+            { id: "USR-001", username: "headadmin", firstName: "Alexander", surname: "Vance", department: "Executive", role: "Head Admin", status: "Active" },
+            { id: "USR-002", username: "it_head", firstName: "Marcus", surname: "Brody", department: "IT", role: "Department Head", status: "Active" },
+            { id: "USR-003", username: "finance_head", firstName: "Elena", surname: "Fisher", department: "Finance", role: "Finance Head", status: "Active" },
+            { id: "USR-004", username: "purchasing_off", firstName: "Victor", surname: "Sullivan", department: "Purchasing", role: "Purchasing Officer", status: "Active" },
+            { id: "USR-005", username: "fnb_head", firstName: "Chloe", surname: "Frazer", department: "F&B", role: "Department Head", status: "Active" },
+            { id: "USR-006", username: "house_staff", firstName: "Nadine", surname: "Ross", department: "Housekeeping", role: "Staff", status: "Active" },
+            { id: "USR-007", username: "eng_head", firstName: "Sam", surname: "Drake", department: "Engineering Materials", role: "Department Head", status: "Active" }
+        ];
+
+        let suppliersList = [
+            { id: "SUP-101", name: "Apex Tech Solutions Inc.", contact: "David Miller", phone: "+1 (555) 382-9100", email: "sales@apextech.com", address: "100 Silicon Way, Suite 400, San Jose, CA", tin: "TIN-9823-1120-001" },
+            { id: "SUP-102", name: "Global Office Supplies Co.", contact: "Rachel Green", phone: "+1 (555) 492-8111", email: "orders@globaloffice.net", address: "450 Commerce Blvd, Chicago, IL", tin: "TIN-4432-8812-003" },
+            { id: "SUP-103", name: "Culinary & Restaurant Depot", contact: "Chef Gordon", phone: "+1 (555) 771-2999", email: "supply@culinarydepot.org", address: "88 Culinary Ave, New York, NY", tin: "TIN-7719-3321-009" },
+            { id: "SUP-104", name: "Prime Industrial & Engineering", contact: "Frank Castle", phone: "+1 (555) 901-2233", email: "support@primeeng.com", address: "12 Industrial Parkway, Detroit, MI", tin: "TIN-1192-5544-012" }
+        ];
+
+        let catalogList = [
+            { sku: "SKU-IT-01", description: "Enterprise Dell Latitude 5540 i7 32GB RAM", category: "IT Hardware", unit: "Unit", price: 1250.00 },
+            { sku: "SKU-IT-02", description: "Cisco Catalyst 9300 24-Port Managed Switch", category: "IT Hardware", unit: "Unit", price: 3400.00 },
+            { sku: "SKU-OFF-01", description: "A4 Premium Multi-Purpose Copy Paper (Ream)", category: "Office Supplies", unit: "Ream", price: 6.50 },
+            { sku: "SKU-OFF-02", description: "Ergonomic Executive Mesh Office Chair", category: "Office Supplies", unit: "Piece", price: 280.00 },
+            { sku: "SKU-FB-01", description: "Commercial Espresso Beans 1kg (Arabica Blend)", category: "F&B Supplies", unit: "Bag", price: 32.00 },
+            { sku: "SKU-ENG-01", description: "Heavy Duty Hydraulic Valve Actuator 24V", category: "Engineering Materials", unit: "Piece", price: 850.00 },
+            { sku: "SKU-HS-01", description: "Commercial Microfiber Cleaning Pads (Pack of 50)", category: "Housekeeping", unit: "Pack", price: 95.00 }
+        ];
+
+        let purchaseRequisitions = [
+            {
+                prNumber: "PR-2026-001",
+                requestDate: "2026-06-01",
+                department: "IT",
+                requester: "Marcus Brody",
+                priority: "High",
+                status: "Pending PO Conversion", // Draft, Dept Head Approval, Finance Approval, Pending PO Conversion, PO Created, Rejected
+                totalAmount: 5900.00,
+                attachments: ["network_upgrade_quote.pdf"],
+                items: [
+                    { description: "Enterprise Dell Latitude 5540 i7 32GB RAM", qty: 2, unit: "Unit", category: "IT Hardware", unitPrice: 1250.00, lineTotal: 2500.00 },
+                    { description: "Cisco Catalyst 9300 24-Port Managed Switch", qty: 1, unit: "Unit", category: "IT Hardware", unitPrice: 3400.00, lineTotal: 3400.00 }
+                ],
+                timeline: [
+                    { date: "2026-06-01 09:15", actor: "Marcus Brody (IT)", action: "Submitted PR for approval" },
+                    { date: "2026-06-01 10:30", actor: "Marcus Brody (IT)", action: "Department Head Approved" },
+                    { date: "2026-06-01 14:00", actor: "Elena Fisher (Finance)", action: "Finance Head Approved" }
+                ],
+                comments: [
+                    { author: "Elena Fisher", date: "2026-06-01 13:55", text: "Approved budget allocation from Q2 IT infrastructure pool." }
+                ]
+            },
+            {
+                prNumber: "PR-2026-002",
+                requestDate: "2026-06-03",
+                department: "Office Supplies",
+                requester: "Nadine Ross",
+                priority: "Normal",
+                status: "Pending Dept Approval",
+                totalAmount: 1390.00,
+                attachments: ["supplies_estimate.xlsx"],
+                items: [
+                    { description: "A4 Premium Multi-Purpose Copy Paper (Ream)", qty: 60, unit: "Ream", category: "Office Supplies", unitPrice: 6.50, lineTotal: 390.00 },
+                    { description: "Ergonomic Executive Mesh Office Chair", qty: 4, unit: "Piece", category: "Office Supplies", unitPrice: 250.00, lineTotal: 1000.00 }
+                ],
+                timeline: [
+                    { date: "2026-06-03 11:20", actor: "Nadine Ross (Housekeeping)", action: "Submitted PR for approval" }
+                ],
+                comments: []
+            },
+            {
+                prNumber: "PR-2026-003",
+                requestDate: "2026-06-04",
+                department: "F&B",
+                requester: "Chloe Frazer",
+                priority: "Urgent",
+                status: "Pending Finance Approval",
+                totalAmount: 3200.00,
+                attachments: ["beverage_inventory.pdf"],
+                items: [
+                    { description: "Commercial Espresso Beans 1kg (Arabica Blend)", qty: 100, unit: "Bag", category: "F&B Supplies", unitPrice: 32.00, lineTotal: 3200.00 }
+                ],
+                timeline: [
+                    { date: "2026-06-04 08:40", actor: "Chloe Frazer (F&B)", action: "Submitted PR" },
+                    { date: "2026-06-04 09:00", actor: "Chloe Frazer (F&B)", action: "Department Head Approved" }
+                ],
+                comments: []
+            }
+        ];
+
+        let purchaseOrders = [
+            {
+                poNumber: "PO-2026-001",
+                prNumber: "PR-2026-001",
+                date: "2026-06-02",
+                supplierName: "Apex Tech Solutions Inc.",
+                subtotal: 5900.00,
+                discount: 100.00,
+                tax: 580.00,
+                shipping: 120.00,
+                totalAmount: 6500.00,
+                status: "Fully Approved", // Pending Finance Review, Pending Resident Manager, Pending Director Approval, Fully Approved, Rejected
+                printCount: 1,
+                firstPrintedAt: "2026-06-02 16:30:12",
+                cryptographicHash: "a94f8c2b19e29f381c828d10493fa8829f03",
+                approvals: [
+                    { role: "Finance Officer", name: "Elena Fisher", status: "Approved", date: "2026-06-02 11:00" },
+                    { role: "Resident Manager", name: "Alexander Vance", status: "Approved", date: "2026-06-02 13:15" },
+                    { role: "Director (>=100k)", name: "N/A (Under Threshold)", status: "Skipped", date: "-" }
+                ]
+            }
+        ];
+
+        let auditLogs = [
+            { timestamp: "2026-06-04 09:00:12", user: "Chloe Frazer", action: "Approved PR-2026-003 as Dept Head", module: "Requisitions" },
+            { timestamp: "2026-06-02 16:30:12", user: "Alexander Vance", action: "Printed PO-2026-001 (Original Authorized)", module: "Purchase Orders" },
+            { timestamp: "2026-06-02 13:15:00", user: "Alexander Vance", action: "Approved PO-2026-001 as Resident Manager", module: "Purchase Orders" },
+            { timestamp: "2026-06-01 14:00:22", user: "Elena Fisher", action: "Approved PR-2026-001 as Finance Head", module: "Requisitions" }
+        ];
+
+        let notifications = [
+            { id: 1, title: "PR Approved", message: "Your requisition PR-2026-001 was approved by Finance.", time: "2 days ago", read: false },
+            { id: 2, title: "New PO Created", message: "PO-2026-001 has been generated from PR-2026-001.", time: "2 days ago", read: false },
+            { id: 3, title: "Approval Required", message: "PR-2026-003 is awaiting Finance Head review.", time: "Yesterday", read: true }
+        ];
+
+        let activeTab = 'dashboard';
+
+        // --- CORE APPLICATION INITIALIZATION ---
+        window.onload = function() {
+            updateUserInterfaceIdentity();
+            switchTab('dashboard');
+            renderNotificationsBadge();
+        };
+
+        function updateUserInterfaceIdentity() {
+            document.getElementById('sidebar-user-name').innerText = currentUser.firstName + " " + currentUser.surname;
+            document.getElementById('sidebar-user-role').innerText = currentUser.department + " / " + currentUser.role;
+            document.getElementById('sidebar-user-avatar').innerText = (currentUser.firstName[0] + currentUser.surname[0]).toUpperCase();
+            
+            document.getElementById('topbar-user-name').innerText = currentUser.firstName + " " + currentUser.surname;
+            document.getElementById('topbar-user-dept').innerText = currentUser.department;
+            document.getElementById('topbar-user-avatar').innerText = (currentUser.firstName[0] + currentUser.surname[0]).toUpperCase();
+
+            // Department isolation badge
+            const badge = document.getElementById('department-badge');
+            if (currentUser.role.includes("Admin") || currentUser.role.includes("Finance") || currentUser.role.includes("Purchasing")) {
+                badge.innerText = "All Departments View";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
+            } else {
+                badge.innerText = currentUser.department + " Department View";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+            }
+        }
+
+        // --- NAVIGATION ROUTER ---
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.nav-link').forEach(el => {
+                if(el.getAttribute('data-tab') === tabId) {
+                    el.className = "nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-indigo-600 text-white shadow-md shadow-indigo-600/20";
+                } else {
+                    el.className = "nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white";
+                }
+            });
+
+            const titles = {
+                'dashboard': 'Dashboard & Purchase Requisitions',
+                'pr-create': 'Create Purchase Requisition',
+                'po-list': 'Purchase Orders & Multi-Tier Approvals',
+                'suppliers': 'Supplier Directory & Item Catalog',
+                'analytics': 'Advanced Analytics Dashboard',
+                'users': 'User Management & Role Permissions',
+                'audit': 'Audit Trail & Compliance Logs'
+            };
+            document.getElementById('current-page-title').innerText = titles[tabId] || 'ProcureFlow';
+
+            const container = document.getElementById('view-container');
+            container.innerHTML = '';
+
+            if (tabId === 'dashboard') renderDashboardView(container);
+            else if (tabId === 'pr-create') renderPrCreateView(container);
+            else if (tabId === 'po-list') renderPoListView(container);
+            else if (tabId === 'suppliers') renderSuppliersCatalogView(container);
+            else if (tabId === 'analytics') renderAnalyticsView(container);
+            else if (tabId === 'users') renderUserManagementView(container);
+            else if (tabId === 'audit') renderAuditLogView(container);
+        }
+
+        // --- VIEW 1: DASHBOARD / PR LIST ---
+        function renderDashboardView(container) {
+            // Filter PRs based on department isolation rules
+            let visiblePRs = purchaseRequisitions;
+            if (!currentUser.role.includes("Admin") && !currentUser.role.includes("Finance") && !currentUser.role.includes("Purchasing")) {
+                visiblePRs = purchaseRequisitions.filter(p => p.department === currentUser.department || p.requester.includes(currentUser.firstName));
+            }
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- KPI Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Requisitions</span>
+                                <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400"><i class="fa-solid fa-file-lines"></i></div>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <span class="text-2xl font-bold text-white">${visiblePRs.length}</span>
+                                <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> +12% MoM</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pending Approvals</span>
+                                <div class="p-2 rounded-xl bg-amber-500/10 text-amber-400"><i class="fa-solid fa-clock"></i></div>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <span class="text-2xl font-bold text-white">${visiblePRs.filter(p => p.status.includes('Pending')).length}</span>
+                                <span class="text-xs text-amber-400 font-semibold">Requires Action</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ready for PO Conversion</span>
+                                <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-file-circle-check"></i></div>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <span class="text-2xl font-bold text-white">${visiblePRs.filter(p => p.status.includes('Pending PO Conversion')).length}</span>
+                                <span class="text-xs text-indigo-400 font-semibold">Purchasing Dept</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total PR Value</span>
+                                <div class="p-2 rounded-xl bg-purple-500/10 text-purple-400"><i class="fa-solid fa-wallet"></i></div>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <span class="text-2xl font-bold text-white">$${visiblePRs.reduce((acc, curr) => acc + curr.totalAmount, 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span class="text-xs text-slate-400">USD</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar & Search -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex items-center space-x-3 flex-1 max-w-lg">
+                                <div class="relative flex-1">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400"><i class="fa-solid fa-magnifying-glass text-sm"></i></span>
+                                    <input type="text" id="pr-search-input" onkeyup="filterPRTable()" placeholder="Search PR Number, Department, Requester..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                                </div>
+                                <select id="pr-status-filter" onchange="filterPRTable()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="">All Statuses</option>
+                                    <option value="Pending">Pending Approval</option>
+                                    <option value="Pending PO Conversion">Pending PO Conversion</option>
+                                    <option value="PO Created">PO Created</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="switchTab('pr-create')" class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-600/30">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Create New PR</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PR Data Table -->
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                        <th class="p-4">PR Number</th>
+                                        <th class="p-4">Request Date</th>
+                                        <th class="p-4">Department</th>
+                                        <th class="p-4">Requester</th>
+                                        <th class="p-4">Priority</th>
+                                        <th class="p-4">Total Amount</th>
+                                        <th class="p-4">Current Status</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pr-table-body" class="divide-y divide-slate-800 text-sm text-slate-300">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            populatePRTable(visiblePRs);
+        }
+
+        function populatePRTable(data) {
+            const tbody = document.getElementById('pr-table-body');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No purchase requisitions found.</td></tr>`;
+                return;
+            }
+            data.forEach(pr => {
+                let priorityClass = "bg-slate-800 text-slate-300";
+                if (pr.priority === 'High') priorityClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                if (pr.priority === 'Urgent') priorityClass = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                if (pr.priority === 'Normal') priorityClass = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+
+                let statusClass = "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
+                if (pr.status.includes('Pending')) statusClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                if (pr.status.includes('Conversion')) statusClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-900/50 transition-colors">
+                        <td class="p-4 font-bold text-white">${pr.prNumber}</td>
+                        <td class="p-4 text-slate-400">${pr.requestDate}</td>
+                        <td class="p-4">${pr.department}</td>
+                        <td class="p-4">${pr.requester}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${priorityClass}">${pr.priority}</span></td>
+                        <td class="p-4 font-semibold text-white">$${pr.totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${pr.status}</span></td>
+                        <td class="p-4 text-right space-x-2">
+                            <button onclick="viewPrDetails('${pr.prNumber}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition-colors">View</button>
+                            ${(currentUser.role.includes("Purchasing") && pr.status.includes('Pending PO Conversion')) ? `
+                                <button onclick="openConvertToPoModal('${pr.prNumber}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-colors shadow-sm">Convert to PO</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterPRTable() {
+            const query = document.getElementById('pr-search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('pr-status-filter').value;
+            let visiblePRs = purchaseRequisitions;
+            if (!currentUser.role.includes("Admin") && !currentUser.role.includes("Finance") && !currentUser.role.includes("Purchasing")) {
+                visiblePRs = purchaseRequisitions.filter(p => p.department === currentUser.department || p.requester.includes(currentUser.firstName));
+            }
+            const filtered = visiblePRs.filter(p => {
+                const matchesQuery = p.prNumber.toLowerCase().includes(query) || p.department.toLowerCase().includes(query) || p.requester.toLowerCase().includes(query);
+                const matchesStatus = statusFilter === "" || p.status.includes(statusFilter);
+                return matchesQuery && matchesStatus;
+            });
+            populatePRTable(filtered);
+        }
+
+        // --- VIEW 2: PR CREATION / EDIT FORM ---
+        function renderPrCreateView(container) {
+            container.innerHTML = `
+                <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Create Purchase Requisition</h3>
+                            <p class="text-xs text-slate-400">Submit departmental material or equipment requests for routing and approval</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="savePrDraft()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors">Save as Draft</button>
+                            <button onclick="submitPrForm()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-indigo-600/30">Submit for Approval</button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <!-- Requester Info Header -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-300">Requester Name</label>
+                                <input type="text" id="pr-req-name" value="${currentUser.firstName} ${currentUser.surname}" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-400">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-300">Department</label>
+                                <select id="pr-req-dept" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="IT">IT</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Executive">Executive</option>
+                                    <option value="Purchasing">Purchasing</option>
+                                    <option value="F&B">F&B</option>
+                                    <option value="Housekeeping">Housekeeping</option>
+                                    <option value="Engineering Materials">Engineering Materials</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-300">Priority Level</label>
+                                <select id="pr-req-priority" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="Normal">Normal</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Line-Item Grid -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-sm font-bold text-white tracking-wide">Line Items</h4>
+                                <div class="flex space-x-2">
+                                    <button onclick="openQuickMasterModal('item')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium"><i class="fa-solid fa-plus mr-1"></i> Add New Item to Catalog</button>
+                                    <button onclick="addPrLineItem()" class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 text-xs font-semibold transition-colors border border-indigo-500/30">+ Add Item Row</button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                            <th class="p-3 w-2/5">Item Description / SKU</th>
+                                            <th class="p-3 w-1/6">Category</th>
+                                            <th class="p-3 w-20">Quantity</th>
+                                            <th class="p-3 w-24">Unit</th>
+                                            <th class="p-3 w-28">Est. Unit Price</th>
+                                            <th class="p-3 w-28">Total</th>
+                                            <th class="p-3 w-12 text-center"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pr-items-tbody" class="divide-y divide-slate-800 text-sm text-slate-300">
+                                        <!-- Rows injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-end pr-4 pt-2">
+                                <div class="text-right">
+                                    <span class="text-xs text-slate-400 mr-4">Estimated Grand Total:</span>
+                                    <span id="pr-grand-total" class="text-lg font-bold text-white">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Upload Area -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium text-slate-300">Attachments & Supporting Quotations</label>
+                            <div class="border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center hover:border-indigo-500/50 transition-colors bg-slate-950/50">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
+                                <p class="text-sm font-medium text-slate-300">Drag and drop files here, or <label class="text-indigo-400 cursor-pointer hover:underline">browse</label></p>
+                                <p class="text-xs text-slate-500 mt-1">Supports PDF, XLSX, PNG, JPG up to 25MB</p>
+                                <input type="file" id="pr-file-upload" class="hidden" multiple onchange="handleFileSelect(event)">
+                                <div id="selected-files-list" class="mt-3 flex flex-wrap gap-2 justify-center"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            addPrLineItem();
+            document.getElementById('pr-req-dept').value = currentUser.department;
+        }
+
+        let currentPrItems = [];
+        let uploadedFiles = [];
+
+        function addPrLineItem() {
+            currentPrItems.push({ description: '', category: 'Office Supplies', qty: 1, unit: 'Unit', unitPrice: 0.00 });
+            renderPrLineItemsTable();
+        }
+
+        function removePrLineItem(index) {
+            currentPrItems.splice(index, 1);
+            if (currentPrItems.length === 0) addPrLineItem();
+            renderPrLineItemsTable();
+        }
+
+        function renderPrLineItemsTable() {
+            const tbody = document.getElementById('pr-items-tbody');
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+
+            currentPrItems.forEach((item, idx) => {
+                const lineTotal = item.qty * item.unitPrice;
+                grandTotal += lineTotal;
+
+                // Catalog options
+                let catalogOptions = `<option value="">Select Catalog Item...</option>`;
+                catalogList.forEach(c => {
+                    catalogOptions += `<option value="${c.sku}" ${item.description === c.description ? 'selected' : ''}>${c.description} ($${c.price})</option>`;
+                });
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-3">
+                            <select onchange="updateCatalogItem(${idx}, this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500 mb-1">
+                                ${catalogOptions}
+                            </select>
+                            <input type="text" value="${item.description}" oninput="currentPrItems[${idx}].description = this.value" placeholder="Or enter item description..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </td>
+                        <td class="p-3">
+                            <select onchange="currentPrItems[${idx}].category = this.value" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <option value="Office Supplies" ${item.category === 'Office Supplies' ? 'selected' : ''}>Office Supplies</option>
+                                <option value="IT Hardware" ${item.category === 'IT Hardware' ? 'selected' : ''}>IT Hardware</option>
+                                <option value="F&B Supplies" ${item.category === 'F&B Supplies' ? 'selected' : ''}>F&B Supplies</option>
+                                <option value="Engineering Materials" ${item.category === 'Engineering Materials' ? 'selected' : ''}>Engineering Materials</option>
+                                <option value="Housekeeping" ${item.category === 'Housekeeping' ? 'selected' : ''}>Housekeeping</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <input type="number" min="1" value="${item.qty}" oninput="currentPrItems[${idx}].qty = parseFloat(this.value)||0; renderPrLineItemsTable();" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white text-center focus:outline-none focus:border-indigo-500">
+                        </td>
+                        <td class="p-3">
+                            <select onchange="currentPrItems[${idx}].unit = this.value" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <option value="Unit" ${item.unit === 'Unit' ? 'selected' : ''}>Unit</option>
+                                <option value="Piece" ${item.unit === 'Piece' ? 'selected' : ''}>Piece</option>
+                                <option value="Ream" ${item.unit === 'Ream' ? 'selected' : ''}>Ream</option>
+                                <option value="Bag" ${item.unit === 'Bag' ? 'selected' : ''}>Bag</option>
+                                <option value="Pack" ${item.unit === 'Pack' ? 'selected' : ''}>Pack</option>
+                                <option value="Box" ${item.unit === 'Box' ? 'selected' : ''}>Box</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <input type="number" step="0.01" value="${item.unitPrice}" oninput="currentPrItems[${idx}].unitPrice = parseFloat(this.value)||0; renderPrLineItemsTable();" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </td>
+                        <td class="p-3 font-semibold text-white">$${lineTotal.toFixed(2)}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="removePrLineItem(${idx})" class="text-slate-500 hover:text-rose-400 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('pr-grand-total').innerText = "$" + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        }
+
+        function updateCatalogItem(idx, sku) {
+            const found = catalogList.find(c => c.sku === sku);
+            if (found) {
+                currentPrItems[idx].description = found.description;
+                currentPrItems[idx].category = found.category;
+                currentPrItems[idx].unit = found.unit;
+                currentPrItems[idx].unitPrice = found.price;
+                renderPrLineItemsTable();
+            }
+        }
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            const listEl = document.getElementById('selected-files-list');
+            for (let f of files) {
+                uploadedFiles.push(f.name);
+            }
+            listEl.innerHTML = uploadedFiles.map(name => `<span class="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs border border-indigo-500/20 flex items-center space-x-2"><i class="fa-solid fa-file-pdf"></i><span>${name}</span></span>`).join('');
+        }
+
+        function submitPrForm() {
+            const dept = document.getElementById('pr-req-dept').value;
+            const priority = document.getElementById('pr-req-priority').value;
+            let totalAmt = currentPrItems.reduce((acc, curr) => acc + (curr.qty * curr.unitPrice), 0);
+
+            if (currentPrItems.length === 0 || currentPrItems[0].description.trim() === "") {
+                showCustomAlert("Error", "Please add at least one valid line item.", "error");
+                return;
+            }
+
+            const newPr = {
+                prNumber: "PR-2026-00" + (purchaseRequisitions.length + 1),
+                requestDate: new Date().toISOString().split('T')[0],
+                department: dept,
+                requester: currentUser.firstName + " " + currentUser.surname,
+                priority: priority,
+                status: "Pending Dept Approval",
+                totalAmount: totalAmt,
+                attachments: uploadedFiles.length > 0 ? uploadedFiles : ["quote_attachment.pdf"],
+                items: currentPrItems.map(i => ({ ...i, lineTotal: i.qty * i.unitPrice })),
+                timeline: [
+                    { date: new Date().toISOString().replace('T', ' ').substring(0, 16), actor: currentUser.firstName + " " + currentUser.surname + " (" + dept + ")", action: "Submitted PR for approval" }
+                ],
+                comments: []
+            };
+
+            purchaseRequisitions.unshift(newPr);
+            auditLogs.unshift({ timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), user: currentUser.firstName + " " + currentUser.surname, action: "Created Requisition " + newPr.prNumber, module: "Requisitions" });
+            
+            showCustomAlert("Success", "Purchase Requisition " + newPr.prNumber + " successfully submitted for departmental approval.", "success");
+            switchTab('dashboard');
+        }
+
+        function savePrDraft() {
+            showCustomAlert("Draft Saved", "Your purchase requisition draft has been saved locally.", "success");
+            switchTab('dashboard');
+        }
+
+        // --- VIEW 3: PR DETAILS & APPROVAL INTERACTION MODAL/VIEW ---
+        let activePrModalData = null;
+
+        function viewPrDetails(prNumber) {
+            const pr = purchaseRequisitions.find(p => p.prNumber === prNumber);
+            if (!pr) return;
+            activePrModalData = pr;
+
+            // Render details modal
+            const modalHtml = `
+                <div id="pr-detail-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+                        <div class="p-6 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900 z-10">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Requisition Details: ${pr.prNumber}</h3>
+                                <p class="text-xs text-slate-400">Department: ${pr.department} | Requested by ${pr.requester} on ${pr.requestDate}</p>
+                            </div>
+                            <button onclick="closePrDetailModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <div class="p-6 space-y-6 flex-1">
+                            <!-- Status & Info Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                    <span class="text-xs text-slate-400">Status</span>
+                                    <p class="text-sm font-bold text-indigo-400 mt-1">${pr.status}</p>
+                                </div>
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                    <span class="text-xs text-slate-400">Priority Level</span>
+                                    <p class="text-sm font-bold text-white mt-1">${pr.priority}</p>
+                                </div>
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                    <span class="text-xs text-slate-400">Total Amount</span>
+                                    <p class="text-sm font-bold text-emerald-400 mt-1">$${pr.totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+                                </div>
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                    <span class="text-xs text-slate-400">Attachments</span>
+                                    <p class="text-sm font-bold text-indigo-300 mt-1"><i class="fa-solid fa-paperclip mr-1"></i>${pr.attachments.length} files attached</p>
+                                </div>
+                            </div>
+
+                            <!-- Line Items Table -->
+                            <div class="space-y-2">
+                                <h4 class="text-sm font-bold text-white">Requested Items</h4>
+                                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                                    <table class="w-full text-left border-collapse text-sm">
+                                        <thead>
+                                            <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                                <th class="p-3">Description</th>
+                                                <th class="p-3">Category</th>
+                                                <th class="p-3">Qty</th>
+                                                <th class="p-3">Unit</th>
+                                                <th class="p-3">Unit Price</th>
+                                                <th class="p-3">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                                            ${pr.items.map(item => `
+                                                <tr>
+                                                    <td class="p-3 font-medium text-white">${item.description}</td>
+                                                    <td class="p-3">${item.category}</td>
+                                                    <td class="p-3">${item.qty}</td>
+                                                    <td class="p-3">${item.unit}</td>
+                                                    <td class="p-3">$${item.unitPrice.toFixed(2)}</td>
+                                                    <td class="p-3 font-semibold text-white">$${item.lineTotal.toFixed(2)}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Approval Timeline & Audit Trail -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <h4 class="text-sm font-bold text-white">Approval Workflow Timeline</h4>
+                                    <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                        ${pr.timeline.map(t => `
+                                            <div class="flex items-start space-x-3 text-xs">
+                                                <div class="h-6 w-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 mt-0.5"><i class="fa-solid fa-check text-[10px]"></i></div>
+                                                <div>
+                                                    <p class="font-semibold text-white">${t.action}</p>
+                                                    <p class="text-slate-400">${t.actor} • ${t.date}</p>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <!-- Comments & Revision Notes -->
+                                <div class="space-y-3 flex flex-col">
+                                    <h4 class="text-sm font-bold text-white">Comments & Revision Notes</h4>
+                                    <div id="pr-comments-box" class="flex-1 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 max-h-48 overflow-y-auto">
+                                        ${pr.comments.length === 0 ? `<p class="text-xs text-slate-500">No comments yet.</p>` : pr.comments.map(c => `
+                                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-xs font-bold text-indigo-400">${c.author}</span>
+                                                    <span class="text-[10px] text-slate-500">${c.date}</span>
+                                                </div>
+                                                <p class="text-xs text-slate-300">${c.text}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <input type="text" id="pr-new-comment" placeholder="Add comment or revision note..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                        <button onclick="addPrComment('${pr.prNumber}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-colors">Send</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Panel Footer -->
+                        <div class="p-4 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <button onclick="processPrAction('${pr.prNumber}', 'Reject')" class="px-4 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 text-xs font-semibold transition-colors border border-rose-500/30">Reject</button>
+                                <button onclick="processPrAction('${pr.prNumber}', 'Request Revision')" class="px-4 py-2 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 text-xs font-semibold transition-colors border border-amber-500/30">Request Revision</button>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="closePrDetailModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium">Close</button>
+                                <button onclick="processPrAction('${pr.prNumber}', 'Approve')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30">Approve PR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closePrDetailModal() {
+            const modal = document.getElementById('pr-detail-modal');
+            if (modal) modal.remove();
+        }
+
+        function addPrComment(prNumber) {
+            const input = document.getElementById('pr-new-comment');
+            const val = input.value.trim();
+            if (!val) return;
+            const pr = purchaseRequisitions.find(p => p.prNumber === prNumber);
+            if (pr) {
+                pr.comments.push({ author: currentUser.firstName + " " + currentUser.surname, date: new Date().toISOString().replace('T', ' ').substring(0, 16), text: val });
+                input.value = '';
+                closePrDetailModal();
+                viewPrDetails(prNumber);
+            }
+        }
+
+        function processPrAction(prNumber, action) {
+            const pr = purchaseRequisitions.find(p => p.prNumber === prNumber);
+            if (!pr) return;
+
+            if (action === 'Approve') {
+                if (pr.status === 'Pending Dept Approval') {
+                    pr.status = 'Pending Finance Approval';
+                    pr.timeline.push({ date: new Date().toISOString().replace('T', ' ').substring(0, 16), actor: currentUser.firstName + " " + currentUser.surname, action: "Department Head Approved" });
+                } else if (pr.status === 'Pending Finance Approval') {
+                    pr.status = 'Pending PO Conversion';
+                    pr.timeline.push({ date: new Date().toISOString().replace('T', ' ').substring(0, 16), actor: currentUser.firstName + " " + currentUser.surname, action: "Finance Head Approved" });
+                }
+            } else if (action === 'Reject') {
+                pr.status = 'Rejected';
+                pr.timeline.push({ date: new Date().toISOString().replace('T', ' ').substring(0, 16), actor: currentUser.firstName + " " + currentUser.surname, action: "Rejected Requisition" });
+            } else if (action === 'Request Revision') {
+                pr.status = 'Revision Requested';
+                pr.timeline.push({ date: new Date().toISOString().replace('T', ' ').substring(0, 16), actor: currentUser.firstName + " " + currentUser.surname, action: "Requested Revision" });
+            }
+
+            auditLogs.unshift({ timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), user: currentUser.firstName + " " + currentUser.surname, action: `Processed PR ${prNumber}: ${action}`, module: "Requisitions" });
+            closePrDetailModal();
+            switchTab('dashboard');
+            showCustomAlert("Success", `Requisition ${prNumber} status updated to ${pr.status}.`, "success");
+        }
+
+        // --- VIEW 4 & 5: PROCUREMENT CONVERSION & PO CREATION ---
+        let convertingPrData = null;
+
+        function openConvertToPoModal(prNumber) {
+            const pr = purchaseRequisitions.find(p => p.prNumber === prNumber);
+            if (!pr) return;
+            convertingPrData = pr;
+
+            let supplierOptions = "";
+            suppliersList.forEach(s => {
+                supplierOptions += `<option value="${s.name}">${s.name} (${s.contact})</option>`;
+            });
+
+            const modalHtml = `
+                <div id="convert-po-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col">
+                        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Convert PR to Purchase Order</h3>
+                                <p class="text-xs text-slate-400">Generate formal PO from Requisition ${pr.prNumber}</p>
+                            </div>
+                            <button onclick="closeConvertToPoModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-300">Select Supplier</label>
+                                <div class="flex space-x-2">
+                                    <select id="po-supplier-select" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                        ${supplierOptions}
+                                    </select>
+                                    <button onclick="openQuickMasterModal('supplier')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">+ Add Supplier</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[11px] text-slate-400">Subtotal (PHP/USD)</label>
+                                    <input type="number" id="po-subtotal" value="${pr.totalAmount}" oninput="calculatePoTotal()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[11px] text-slate-400">Discount</label>
+                                    <input type="number" id="po-discount" value="0.00" oninput="calculatePoTotal()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[11px] text-slate-400">Taxes (VAT 10%)</label>
+                                    <input type="number" id="po-tax" value="${(pr.totalAmount * 0.1).toFixed(2)}" oninput="calculatePoTotal()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[11px] text-slate-400">Shipping Fees</label>
+                                    <input type="number" id="po-shipping" value="150.00" oninput="calculatePoTotal()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white">
+                                </div>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                                <span class="text-sm font-bold text-slate-300">Final PO Total:</span>
+                                <span id="po-final-total" class="text-xl font-bold text-emerald-400">$${(pr.totalAmount * 1.1 + 150).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end space-x-3">
+                            <button onclick="closeConvertToPoModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-medium">Cancel</button>
+                            <button onclick="executePoCreation()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30">Generate & Submit PO</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeConvertToPoModal() {
+            const modal = document.getElementById('convert-po-modal');
+            if (modal) modal.remove();
+        }
+
+        function calculatePoTotal() {
+            const sub = parseFloat(document.getElementById('po-subtotal').value) || 0;
+            const disc = parseFloat(document.getElementById('po-discount').value) || 0;
+            const tax = parseFloat(document.getElementById('po-tax').value) || 0;
+            const ship = parseFloat(document.getElementById('po-shipping').value) || 0;
+            const total = Math.max(0, sub - disc + tax + ship);
+            document.getElementById('po-final-total').innerText = "$" + total.toLocaleString(undefined, {minimumFractionDigits: 2});
+        }
+
+        function executePoCreation() {
+            if (!convertingPrData) return;
+            const supplier = document.getElementById('po-supplier-select').value;
+            const sub = parseFloat(document.getElementById('po-subtotal').value) || 0;
+            const disc = parseFloat(document.getElementById('po-discount').value) || 0;
+            const tax = parseFloat(document.getElementById('po-tax').value) || 0;
+            const ship = parseFloat(document.getElementById('po-shipping').value) || 0;
+            const total = sub - disc + tax + ship;
+
+            const newPoNumber = "PO-2026-00" + (purchaseOrders.length + 1);
+            
+            const newPo = {
+                poNumber: newPoNumber,
+                prNumber: convertingPrData.prNumber,
+                date: new Date().toISOString().split('T')[0],
+                supplierName: supplier,
+                subtotal: sub,
+                discount: disc,
+                tax: tax,
+                shipping: ship,
+                totalAmount: total,
+                status: "Pending Finance Review",
+                printCount: 0,
+                firstPrintedAt: null,
+                cryptographicHash: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                approvals: [
+                    { role: "Finance Officer", name: "Elena Fisher", status: "Pending", date: "-" },
+                    { role: "Resident Manager", name: "Alexander Vance", status: "Pending", date: "-" },
+                    { role: "Director (>=100k)", name: total >= 100000 ? "Pending Director" : "N/A (Under Threshold)", status: total >= 100000 ? "Pending" : "Skipped", date: "-" }
+                ]
+            };
+
+            purchaseOrders.unshift(newPo);
+            convertingPrData.status = "PO Created (" + newPoNumber + ")";
+            auditLogs.unshift({ timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), user: currentUser.firstName + " " + currentUser.surname, action: `Generated PO ${newPoNumber} from ${convertingPrData.prNumber}`, module: "Purchase Orders" });
+
+            closeConvertToPoModal();
+            showCustomAlert("Success", `Purchase Order ${newPoNumber} successfully generated and sent for multi-tier review.`, "success");
+            switchTab('po-list');
+        }
+
+        // --- VIEW 6: PURCHASE ORDERS LIST & MULTI-TIER APPROVALS ---
+        function renderPoListView(container) {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-base font-bold text-white">Purchase Orders Directory</h3>
+                            <span class="text-xs text-slate-400">Multi-Tier Approvals & Cryptographic Watermarked PDF Print Engine</span>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                        <th class="p-4">PO Number</th>
+                                        <th class="p-4">Linked PR</th>
+                                        <th class="p-4">Date</th>
+                                        <th class="p-4">Supplier</th>
+                                        <th class="p-4">Total Amount</th>
+                                        <th class="p-4">Approval Status</th>
+                                        <th class="p-4 text-right">Actions / Print</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800 text-sm text-slate-300">
+                                    ${purchaseOrders.map(po => `
+                                        <tr class="hover:bg-slate-900/50 transition-colors">
+                                            <td class="p-4 font-bold text-white">${po.poNumber}</td>
+                                            <td class="p-4 text-indigo-400 font-medium">${po.prNumber}</td>
+                                            <td class="p-4 text-slate-400">${po.date}</td>
+                                            <td class="p-4">${po.supplierName}</td>
+                                            <td class="p-4 font-semibold text-white">$${po.totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                                            <td class="p-4">
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${po.status === 'Fully Approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${po.status}</span>
+                                            </td>
+                                            <td class="p-4 text-right space-x-2">
+                                                <button onclick="openPoDetailsModal('${po.poNumber}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition-colors">Review</button>
+                                                <button onclick="openPrintablePoModal('${po.poNumber}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-colors shadow-sm"><i class="fa-solid fa-print mr-1"></i> Print / PDF</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openPoDetailsModal(poNumber) {
+            const po = purchaseOrders.find(p => p.poNumber === poNumber);
+            if (!po) return;
+
+            const modalHtml = `
+                <div id="po-detail-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col">
+                        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Purchase Order Approval: ${po.poNumber}</h3>
+                                <p class="text-xs text-slate-400">Supplier: ${po.supplierName} | Total: $${po.totalAmount.toLocaleString()}</p>
+                            </div>
+                            <button onclick="document.getElementById('po-detail-modal').remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            <div class="space-y-3">
+                                <h4 class="text-sm font-bold text-white">Multi-Tier Approval Routing & Pricing Visibility</h4>
+                                <div class="space-y-2">
+                                    ${po.approvals.map(app => `
+                                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                                            <div>
+                                                <p class="text-xs font-bold text-white">${app.role} (${app.name})</p>
+                                                <p class="text-[10px] text-slate-400">Timestamp: ${app.date}</p>
+                                            </div>
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${app.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (app.status === 'Skipped' ? 'bg-slate-800 text-slate-400' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20')}">${app.status}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end space-x-3">
+                            <button onclick="document.getElementById('po-detail-modal').remove()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium">Close</button>
+                            ${po.status !== 'Fully Approved' ? `
+                                <button onclick="approvePoItem('${po.poNumber}')" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30">Approve PO Step</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function approvePoItem(poNumber) {
+            const po = purchaseOrders.find(p => p.poNumber === poNumber);
+            if (!po) return;
+            po.status = "Fully Approved";
+            po.approvals.forEach(a => {
+                if (a.status === 'Pending') {
+                    a.status = 'Approved';
+                    a.date = new Date().toISOString().replace('T', ' ').substring(0, 16);
+                }
+            });
+            auditLogs.unshift({ timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), user: currentUser.firstName + " " + currentUser.surname, action: `Fully Approved PO ${po.poNumber}`, module: "Purchase Orders" });
+            document.getElementById('po-detail-modal').remove();
+            showCustomAlert("Success", `Purchase Order ${po.poNumber} has been fully approved for vendor issuance.`, "success");
+            switchTab('po-list');
+        }
+
+        // --- VIEW 7: PRINTABLE PURCHASE ORDER & WATERMARK ENGINE ---
+        function openPrintablePoModal(poNumber) {
+            const po = purchaseOrders.find(p => p.poNumber === poNumber);
+            if (!po) return;
+            const pr = purchaseRequisitions.find(p => p.prNumber === po.prNumber) || { items: [] };
+
+            // Watermark state calculation
+            let watermarkClass = "watermark-original";
+            let printNotice = "ORIGINAL AUTHORIZED COPY - VALID FOR VENDOR ISSUANCE";
+            if (po.printCount >= 1) {
+                watermarkClass = "watermark-reprint";
+                printNotice = "REPRINT - OFFICE COPY ONLY (NOT VALID FOR VENDOR ISSUANCE)";
+            }
+
+            // Increment print count & record first printed timestamp if 0
+            if (po.printCount === 0) {
+                po.firstPrintedAt = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            }
+            po.printCount++;
+            auditLogs.unshift({ timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), user: currentUser.firstName + " " + currentUser.surname, action: `Printed PO ${po.poNumber} (Print Count: ${po.printCount})`, module: "Purchase Orders" });
+
+            const modalHtml = `
+                <div id="print-po-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div class="bg-white text-slate-900 rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto shadow-2xl flex flex-col relative ${watermarkClass}">
+                        <!-- Top Toolbar (No Print) -->
+                        <div class="p-4 bg-slate-900 text-white flex items-center justify-between no-print sticky top-0 z-20">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${po.printCount === 1 ? 'bg-indigo-600 text-white' : 'bg-rose-600 text-white'}">Print Count: ${po.printCount}</span>
+                                <span class="text-xs text-slate-300">${printNotice}</span>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow"><i class="fa-solid fa-print mr-1"></i> Print / Save PDF</button>
+                                <button onclick="document.getElementById('print-po-modal').remove(); switchTab('po-list');" class="px-4 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 rounded-xl text-xs font-medium">Close</button>
+                            </div>
+                        </div>
+
+                        <!-- PRINT AREA BODY -->
+                        <div id="print-area" class="p-10 space-y-8 bg-white relative z-0">
+                            <!-- Header -->
+                            <div class="flex justify-between items-start border-b border-slate-200 pb-6">
+                                <div>
+                                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">PROCUREFLOW ENTERPRISE</h1>
+                                    <p class="text-xs text-slate-500">Global Procurement & Supply Chain Division</p>
+                                    <p class="text-xs text-slate-500">100 Corporate Parkway, Suite 500, New York, NY</p>
+                                </div>
+                                <div class="text-right">
+                                    <h2 class="text-xl font-bold text-indigo-600">PURCHASE ORDER</h2>
+                                    <p class="text-sm font-bold text-slate-800">${po.poNumber}</p>
+                                    <p class="text-xs text-slate-500">Date: ${po.date}</p>
+                                    <p class="text-xs text-slate-500">Ref PR: ${po.prNumber}</p>
+                                </div>
+                            </div>
+
+                            <!-- Supplier & Ship-to -->
+                            <div class="grid grid-cols-2 gap-6 text-sm">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Vendor / Supplier</span>
+                                    <p class="font-bold text-slate-900 mt-1">${po.supplierName}</p>
+                                    <p class="text-xs text-slate-600">Authorized Vendor Partner</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ship To / Deliver To</span>
+                                    <p class="font-bold text-slate-900 mt-1">ProcureFlow Central Warehouse</p>
+                                    <p class="text-xs text-slate-600">Attn: Receiving & Logistics Dept</p>
+                                </div>
+                            </div>
+
+                            <!-- Line Items Table -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-sm">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-300">
+                                            <th class="p-3">Item Description</th>
+                                            <th class="p-3">Category</th>
+                                            <th class="p-3 text-center">Qty</th>
+                                            <th class="p-3">Unit</th>
+                                            <th class="p-3 text-right">Unit Price</th>
+                                            <th class="p-3 text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 text-slate-800">
+                                        ${pr.items && pr.items.length > 0 ? pr.items.map(i => `
+                                            <tr>
+                                                <td class="p-3 font-medium">${i.description}</td>
+                                                <td class="p-3 text-slate-500">${i.category}</td>
+                                                <td class="p-3 text-center font-bold">${i.qty}</td>
+                                                <td class="p-3 text-slate-500">${i.unit}</td>
+                                                <td class="p-3 text-right">$${i.unitPrice.toFixed(2)}</td>
+                                                <td class="p-3 text-right font-bold">$${i.lineTotal.toFixed(2)}</td>
+                                            </tr>
+                                        `).join('') : `<tr><td colspan="6" class="p-4 text-center text-slate-400">Standard PO Items</td></tr>`}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Totals Box -->
+                            <div class="flex justify-end pt-4">
+                                <div class="w-72 space-y-2 text-sm bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <div class="flex justify-between text-slate-600">
+                                        <span>Subtotal:</span>
+                                        <span class="font-semibold">$${po.subtotal.toFixed(2)}</span>
+                                    </div>
+                                    <div class="flex justify-between text-slate-600">
+                                        <span>Discount:</span>
+                                        <span class="font-semibold">-$${po.discount.toFixed(2)}</span>
+                                    </div>
+                                    <div class="flex justify-between text-slate-600">
+                                        <span>Taxes (VAT):</span>
+                                        <span class="font-semibold">$${po.tax.toFixed(2)}</span>
+                                    </div>
+                                    <div class="flex justify-between text-slate-600">
+                                        <span>Shipping:</span>
+                                        <span class="font-semibold">$${po.shipping.toFixed(2)}</span>
+                                    </div>
+                                    <div class="border-t border-slate-300 pt-2 flex justify-between text-base font-bold text-slate-900">
+                                        <span>Grand Total:</span>
+                                        <span>$${po.totalAmount.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Signatures -->
+                            <div class="grid grid-cols-3 gap-6 pt-12 text-xs">
+                                <div class="border-t border-slate-400 pt-2 text-center">
+                                    <p class="font-bold text-slate-800">Elena Fisher</p>
+                                    <p class="text-slate-500">Finance Head</p>
+                                </div>
+                                <div class="border-t border-slate-400 pt-2 text-center">
+                                    <p class="font-bold text-slate-800">Alexander Vance</p>
+                                    <p class="text-slate-500">Resident Manager / Executive</p>
+                                </div>
+                                <div class="border-t border-slate-400 pt-2 text-center">
+                                    <p class="font-bold text-slate-800">Authorized Vendor</p>
+                                    <p class="text-slate-500">Acceptance Signature</p>
+                                </div>
+                            </div>
+
+                            <!-- Cryptographic Footer Hash -->
+                            <div class="pt-8 border-t border-slate-200 text-[10px] text-slate-400 flex flex-col justify-between items-center bg-slate-50 p-3 rounded-lg">
+                                <p class="font-mono">CRYPTOGRAPHIC HASH: SHA256-${po.cryptographicHash}-${po.poNumber}-${po.totalAmount}</p>
+                                <p class="mt-1">First Printed Timestamp: ${po.firstPrintedAt} | Total Print Iterations: ${po.printCount} | ProcureFlow Secure Audit Engine</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // --- VIEW 8: SUPPLIER & CATALOG MASTER LIST ---
+        function renderSuppliersCatalogView(container) {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex space-x-4 border-b border-slate-800 pb-3">
+                        <button onclick="switchCatalogTab('suppliers')" id="cat-tab-sup" class="px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition-all">Supplier Directory</button>
+                        <button onclick="switchCatalogTab('items')" id="cat-tab-item" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-400 hover:text-white transition-all">Item & Standard Pricing Catalog</button>
+                    </div>
+
+                    <div id="catalog-content-area" class="space-y-4">
+                        <!-- Rendered by tab switcher -->
+                    </div>
+                </div>
+            `;
+            switchCatalogTab('suppliers');
+        }
+
+        function switchCatalogTab(tab) {
+            const supBtn = document.getElementById('cat-tab-sup');
+            const itemBtn = document.getElementById('cat-tab-item');
+            const area = document.getElementById('catalog-content-area');
+
+            if (tab === 'suppliers') {
+                supBtn.className = "px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition-all";
+                itemBtn.className = "px-4 py-2 rounded-xl text-sm font-bold text-slate-400 hover:text-white transition-all";
+                
+                area.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-base font-bold text-white">Approved Supplier Directory</h3>
+                            <button onclick="openQuickMasterModal('supplier')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30">+ Register New Supplier</button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                        <th class="p-4">Supplier Name</th>
+                                        <th class="p-4">Contact Person</th>
+                                        <th class="p-4">Phone / Email</th>
+                                        <th class="p-4">Address</th>
+                                        <th class="p-4">TIN Number</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800 text-slate-300">
+                                    ${suppliersList.map(s => `
+                                        <tr class="hover:bg-slate-900/50 transition-colors">
+                                            <td class="p-4 font-bold text-white">${s.name}</td>
+                                            <td class="p-4">${s.contact}</td>
+                                            <td class="p-4"><p class="text-indigo-400">${s.phone}</p><p class="text-xs text-slate-500">${s.email}</p></td>
+                                            <td class="p-4 text-xs text-slate-400">${s.address}</td>
+                                            <td class="p-4 font-mono text-xs text-slate-400">${s.tin}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } else {
+                itemBtn.className = "px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition-all";
+                supBtn.className = "px-4 py-2 rounded-xl text-sm font-bold text-slate-400 hover:text-white transition-all";
+
+                area.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-base font-bold text-white">Standard Item & Pricing Catalog</h3>
+                            <button onclick="openQuickMasterModal('item')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30">+ Add Catalog Item</button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                        <th class="p-4">SKU / Code</th>
+                                        <th class="p-4">Item Description</th>
+                                        <th class="p-4">Category</th>
+                                        <th class="p-4">Unit</th>
+                                        <th class="p-4 text-right">Standard Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800 text-slate-300">
+                                    ${catalogList.map(c => `
+                                        <tr class="hover:bg-slate-900/50 transition-colors">
+                                            <td class="p-4 font-mono text-xs text-indigo-400 font-bold">${c.sku}</td>
+                                            <td class="p-4 font-medium text-white">${c.description}</td>
+                                            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">${c.category}</span></td>
+                                            <td class="p-4 text-slate-400">${c.unit}</td>
+                                            <td class="p-4 text-right font-bold text-emerald-400">$${c.price.toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // --- QUICK MASTER MODAL SHORTCUTS ---
+        function openQuickMasterModal(type) {
+            const modal = document.getElementById('quick-master-modal');
+            const title = document.getElementById('quick-master-title');
+            const body = document.getElementById('quick-master-body');
+            modal.classList.remove('hidden');
+
+            if (type === 'supplier') {
+                title.innerText = "Register New Supplier";
+                body.innerHTML = `
+                    <div class="space-y-3">
+                        <div><label class="text-xs text-slate-400">Supplier Name</label><input type="text" id="qs-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        <div><label class="text-xs text-slate-400">Contact Person</label><input type="text" id="qs-contact" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-xs text-slate-400">Phone</label><input type="text" id="qs-phone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                            <div><label class="text-xs text-slate-400">Email</label><input type="text" id="qs-email" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        </div>
+                        <div><label class="text-xs text-slate-400">Address</label><input type="text" id="qs-address" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        <div><label class="text-xs text-slate-400">TIN Number</label><input type="text" id="qs-tin" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        <button onclick="saveQuickSupplier()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm mt-4">Save Supplier</button>
+                    </div>
+                `;
+            } else {
+                title.innerText = "Add New Catalog Item";
+                body.innerHTML = `
+                    <div class="space-y-3">
+                        <div><label class="text-xs text-slate-400">SKU / Code</label><input type="text" id="qi-sku" value="SKU-NEW-0${catalogList.length+1}" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white font-mono"></div>
+                        <div><label class="text-xs text-slate-400">Item Description</label><input type="text" id="qi-desc" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-xs text-slate-400">Category</label>
+                                <select id="qi-cat" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white">
+                                    <option value="Office Supplies">Office Supplies</option>
+                                    <option value="IT Hardware">IT Hardware</option>
+                                    <option value="F&B Supplies">F&B Supplies</option>
+                                    <option value="Engineering Materials">Engineering Materials</option>
+                                    <option value="Housekeeping">Housekeeping</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Unit</label>
+                                <select id="qi-unit" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white">
+                                    <option value="Unit">Unit</option>
+                                    <option value="Piece">Piece</option>
+                                    <option value="Ream">Ream</option>
+                                    <option value="Bag">Bag</option>
+                                    <option value="Pack">Pack</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div><label class="text-xs text-slate-400">Standard Price ($)</label><input type="number" step="0.01" id="qi-price" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"></div>
+                        <button onclick="saveQuickItem()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm mt-4">Save Catalog Item</button>
+                    </div>
+                `;
+            }
+        }
+
+        function closeQuickMasterModal() {
+            document.getElementById('quick-master-modal').classList.add('hidden');
+        }
+
+        function saveQuickSupplier() {
+            const name = document.getElementById('qs-name').value;
+            if (!name) { showCustomAlert("Error", "Supplier name is required.", "error"); return; }
+            suppliersList.push({
+                id: "SUP-10" + (suppliersList.length + 1),
+                name: name,
+                contact: document.getElementById('qs-contact').value || "N/A",
+                phone: document.getElementById('qs-phone').value || "N/A",
+                email: document.getElementById('qs-email').value || "N/A",
+                address: document.getElementById('qs-address').value || "N/A",
+                tin: document.getElementById('qs-tin').value || "TIN-0000"
+            });
+            closeQuickMasterModal();
+            showCustomAlert("Success", "Supplier registered successfully.", "success");
+            if (activeTab === 'suppliers') switchCatalogTab('suppliers');
+        }
+
+        function saveQuickItem() {
+            const desc = document.getElementById('qi-desc').value;
+            const price = parseFloat(document.getElementById('qi-price').value) || 0;
+            if (!desc) { showCustomAlert("Error", "Item description is required.", "error"); return; }
+            catalogList.push({
+                sku: document.getElementById('qi-sku').value,
+                description: desc,
+                category: document.getElementById('qi-cat').value,
+                unit: document.getElementById('qi-unit').value,
+                price: price
+            });
+            closeQuickMasterModal();
+            showCustomAlert("Success", "Catalog item added successfully.", "success");
+            if (activeTab === 'suppliers') switchCatalogTab('items');
+        }
+
+        // --- VIEW 9: ADVANCED ANALYTICS DASHBOARD ---
+        function renderAnalyticsView(container) {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Global Filters Bar -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xs font-semibold text-slate-400">Interval:</span>
+                            <div class="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+                                <button class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white">Daily</button>
+                                <button class="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white">Weekly</button>
+                                <button class="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white">Monthly</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <select class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                                <option>All Departments</option>
+                                <option>IT</option>
+                                <option>Finance</option>
+                                <option>F&B</option>
+                            </select>
+                            <select class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                                <option>All Spend Categories</option>
+                                <option>IT Hardware</option>
+                                <option>Office Supplies</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                            <h4 class="text-sm font-bold text-white">Spend by Category (Pareto Analysis)</h4>
+                            <div class="h-72 relative flex items-center justify-center">
+                                <canvas id="chartCategorySpend"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                            <h4 class="text-sm font-bold text-white">Budget Variance & Burn Rate by Dept</h4>
+                            <div class="h-72 relative flex items-center justify-center">
+                                <canvas id="chartBudgetVariance"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Initialize Chart.js
+            setTimeout(() => {
+                const ctx1 = document.getElementById('chartCategorySpend').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['IT Hardware', 'Office Supplies', 'F&B Supplies', 'Engineering', 'Housekeeping'],
+                        datasets: [{
+                            data: [42000, 18500, 24000, 31000, 9500],
+                            backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } } }
+                });
+
+                const ctx2 = document.getElementById('chartBudgetVariance').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['IT', 'Finance', 'Executive', 'F&B', 'Housekeeping'],
+                        datasets: [{
+                            label: 'Budget Burn Rate (%)',
+                            data: [78, 62, 45, 88, 55],
+                            backgroundColor: '#4f46e5',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } }, plugins: { legend: { display: false } } }
+                });
+            }, 100);
+        }
+
+        // --- VIEW 10: USER MANAGEMENT & ROLE PERMISSIONS ---
+        function renderUserManagementView(container) {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-white">User Accounts & Role Permissions</h3>
+                                <p class="text-xs text-slate-400">Head Admin can register, edit status, and issue temporary password resets</p>
+                            </div>
+                            <button onclick="openRegisterUserModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30">+ Register New User</button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                        <th class="p-4">User ID / Username</th>
+                                        <th class="p-4">Full Name</th>
+                                        <th class="p-4">Department</th>
+                                        <th class="p-4">Position / Role</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4 text-right">Admin Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800 text-slate-300">
+                                    ${usersList.map(u => `
+                                        <tr class="hover:bg-slate-900/50 transition-colors">
+                                            <td class="p-4 font-mono text-xs text-indigo-400 font-bold">${u.id} (${u.username})</td>
+                                            <td class="p-4 font-medium text-white">${u.firstName} ${u.surname}</td>
+                                            <td class="p-4">${u.department}</td>
+                                            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">${u.role}</span></td>
+                                            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${u.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${u.status}</span></td>
+                                            <td class="p-4 text-right space-x-2">
+                                                <button onclick="openResetPasswordModal('${u.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-400 transition-colors" title="Reset Password"><i class="fa-solid fa-key"></i></button>
+                                                <button onclick="toggleUserStatus('${u.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 transition-colors">Toggle Status</button>
+                                                <button onclick="deleteUserRecord('${u.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-rose-400 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openRegisterUserModal() {
+            const modalHtml = `
+                <div id="reg-user-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-white">Register New Staff Account</h3>
+                            <button onclick="document.getElementById('reg-user-modal').remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="p-6 space-y-4 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><label class="text-slate-400">First Name</label><input type="text" id="ru-first" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                                <div><label class="text-slate-400">Surname</label><input type="text" id="ru-sur" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1"></div>
+                            </div>
+                            <div><label class="text-slate-400">Username / ID</label><input type="text" id="ru-username" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1 font-mono"></div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-slate-400">Department</label>
+                                    <select id="ru-dept" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1">
+                                        <option value="IT">IT</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Executive">Executive</option>
+                                        <option value="Purchasing">Purchasing</option>
+                                        <option value="F&B">F&B</option>
+                                        <option value="Housekeeping">Housekeeping</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-slate-400">Role</label>
+                                    <select id="ru-role" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1">
+                                        <option value="Staff">Staff</option>
+                                        <option value="Department Head">Department Head</option>
+                                        <option value="Finance Head">Finance Head</option>
+                                        <option value="Purchasing Officer">Purchasing Officer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div><label class="text-slate-400">Temporary Password</label><input type="password" id="ru-pwd" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1" value="ProcureFlow2026!"></div>
+                            <button onclick="executeRegisterUser()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm mt-4">Save & Register Account</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function executeRegisterUser() {
+            const first = document.getElementById('ru-first').value;
+            const sur = document.getElementById('ru-sur').value;
+            const username = document.getElementById('ru-username').value;
+            if (!first || !username) { showCustomAlert("Error", "Please fill in all required fields.", "error"); return; }
+
+            usersList.push({
+                id: "USR-00" + (usersList.length + 1),
+                username: username,
+                firstName: first,
+                surname: sur,
+                department: document.getElementById('ru-dept').value,
+                role: document.getElementById('ru-role').value,
+                status: "Active"
+            });
+
+            document.getElementById('reg-user-modal').remove();
+            showCustomAlert("Success", "New user account registered successfully.", "success");
+            switchTab('users');
+        }
+
+        function openResetPasswordModal(userId) {
+            const u = usersList.find(item => item.id === userId);
+            if (!u) return;
+
+            const modalHtml = `
+                <div id="reset-pwd-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-base font-bold text-white">Reset Password</h3>
+                            <button onclick="document.getElementById('reset-pwd-modal').remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-400">Issue a new temporary credential for <span class="text-white font-semibold">${u.firstName} ${u.surname} (${u.username})</span>.</p>
+                        <div>
+                            <label class="text-xs text-slate-400">New Temporary Password</label>
+                            <input type="text" id="new-temp-pwd" value="Flow2026Secure!" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white mt-1">
+                        </div>
+                        <button onclick="executePasswordReset('${u.id}')" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm">Confirm & Issue Password</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function executePasswordReset(userId) {
+            document.getElementById('reset-pwd-modal').remove();
+            showCustomAlert("Success", "Password reset successfully. Secure notification sent to staff member.", "success");
+            auditLogs.unshift({ timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), user: currentUser.firstName + " " + currentUser.surname, action: `Reset password for user ${userId}`, module: "Administration" });
+        }
+
+        function toggleUserStatus(userId) {
+            const u = usersList.find(item => item.id === userId);
+            if (u) {
+                u.status = u.status === 'Active' ? 'Inactive' : 'Active';
+                switchTab('users');
+                showCustomAlert("Success", `User ${u.username} status toggled to ${u.status}.`, "success");
+            }
+        }
+
+        function deleteUserRecord(userId) {
+            usersList = usersList.filter(u => u.id !== userId);
+            switchTab('users');
+            showCustomAlert("Success", "User account removed from directory.", "success");
+        }
+
+        // --- VIEW 11: AUDIT & LOGS MODULE ---
+        function renderAuditLogView(container) {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-white">Security & Audit Compliance Trail</h3>
+                                <p class="text-xs text-slate-400">Immutable chronological log of all administrative actions, PR submissions, and PO printing</p>
+                            </div>
+                            <button onclick="showCustomAlert('Export', 'Audit trail exported to secure CSV format.', 'success')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold">Export CSV Log</button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-800">
+                                        <th class="p-4">Timestamp</th>
+                                        <th class="p-4">User</th>
+                                        <th class="p-4">Module</th>
+                                        <th class="p-4">Action Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800 text-slate-300 font-mono text-xs">
+                                    ${auditLogs.map(a => `
+                                        <tr class="hover:bg-slate-900/50 transition-colors">
+                                            <td class="p-4 text-indigo-400">${a.timestamp}</td>
+                                            <td class="p-4 text-slate-200">${a.user}</td>
+                                            <td class="p-4"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-sans">${a.module}</span></td>
+                                            <td class="p-4 font-sans text-white">${a.action}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- ACCOUNT SWITCHER MODAL CONTROLS ---
+        function openAccountSwitcher() {
+            const modal = document.getElementById('account-modal');
+            const list = document.getElementById('account-list');
+            modal.classList.remove('hidden');
+
+            list.innerHTML = usersList.map(u => `
+                <div onclick="switchActiveUser('${u.id}')" class="p-3 rounded-xl bg-slate-950 border ${u.id === currentUser.id ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-800 hover:border-slate-700'} cursor-pointer flex items-center justify-between transition-all">
+                    <div class="flex items-center space-x-3">
+                        <div class="h-8 w-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">${(u.firstName[0]+u.surname[0]).toUpperCase()}</div>
+                        <div>
+                            <p class="text-sm font-bold text-white">${u.firstName} ${u.surname}</p>
+                            <p class="text-xs text-slate-400">${u.department} • ${u.role}</p>
+                        </div>
+                    </div>
+                    ${u.id === currentUser.id ? '<span class="text-xs font-semibold text-indigo-400">Active</span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function closeAccountSwitcher() {
+            document.getElementById('account-modal').classList.add('hidden');
+        }
+
+        function switchActiveUser(userId) {
+            const found = usersList.find(u => u.id === userId);
+            if (found) {
+                currentUser = found;
+                updateUserInterfaceIdentity();
+                closeAccountSwitcher();
+                switchTab(activeTab);
+                showCustomAlert("User Switched", `Now operating as ${currentUser.firstName} ${currentUser.surname} (${currentUser.role}, ${currentUser.department}).`, "success");
+            }
+        }
+
+        // --- NOTIFICATIONS MODAL ---
+        function toggleNotificationsModal() {
+            const modal = document.getElementById('notifications-modal');
+            const list = document.getElementById('notifications-list');
+            modal.classList.toggle('hidden');
+
+            if (!modal.classList.contains('hidden')) {
+                list.innerHTML = notifications.map(n => `
+                    <div class="p-3 rounded-xl bg-slate-950 border ${n.read ? 'border-slate-800' : 'border-indigo-500/50 bg-indigo-500/5'} space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-white">${n.title}</span>
+                            <span class="text-[10px] text-slate-500">${n.time}</span>
+                        </div>
+                        <p class="text-xs text-slate-300">${n.message}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderNotificationsBadge() {
+            const unread = notifications.filter(n => !n.read).length;
+            document.getElementById('notification-badge').innerText = unread;
+        }
+
+        function markAllNotificationsRead() {
+            notifications.forEach(n => n.read = true);
+            renderNotificationsBadge();
+            toggleNotificationsModal();
+            showCustomAlert("Success", "All notifications marked as read.", "success");
+        }
+
+        // --- CUSTOM ALERT MODAL ---
+        function showCustomAlert(title, message, type = "info") {
+            const modal = document.getElementById('alert-modal');
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = message;
+            const iconWrap = document.getElementById('alert-icon-wrap');
+            const icon = document.getElementById('alert-icon');
+
+            if (type === 'success') {
+                iconWrap.className = "h-14 w-14 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center mb-4 text-2xl border border-emerald-500/30";
+                icon.className = "fa-solid fa-circle-check";
+            } else if (type === 'error') {
+                iconWrap.className = "h-14 w-14 rounded-full bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center mb-4 text-2xl border border-rose-500/30";
+                icon.className = "fa-solid fa-triangle-exclamation";
+            } else {
+                iconWrap.className = "h-14 w-14 rounded-full bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center mb-4 text-2xl border border-indigo-500/30";
+                icon.className = "fa-solid fa-circle-info";
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('alert-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
