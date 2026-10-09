@@ -82,6 +82,8 @@
         let currentTab = 'dashboard';
         let currentUser = { id: 'USR-001', name: 'Alexander Vance', role: 'Head Admin', department: 'Executive' };
 
+        let availableRoles = ['Head Admin', 'Department Head', 'Finance Head', 'Purchasing Officer', 'Staff', 'Director'];
+
         const users = [
             { id: 'USR-001', username: 'headadmin', name: 'Alexander Vance', department: 'Executive', role: 'Head Admin', status: 'Active' },
             { id: 'USR-002', username: 'it_head', name: 'Marcus Brody', department: 'IT', role: 'Department Head', status: 'Active' },
@@ -257,7 +259,11 @@
                                     <th class="py-3 px-4">User ID / Username <button onclick="editColumn('id')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
                                     <th class="py-3 px-4">Full Name <button onclick="editColumn('name')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
                                     <th class="py-3 px-4">Department <button onclick="editColumn('department')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
-                                    <th class="py-3 px-4">Position / Role <button onclick="editColumn('role')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button></th>
+                                    <th class="py-3 px-4">
+                                        Position / Role 
+                                        <button onclick="editColumn('role')" class="text-indigo-400 hover:text-white ml-1 text-[10px] bg-indigo-900/40 px-1.5 py-0.5 rounded">Edit Col</button>
+                                        <button onclick="addNewRole()" class="text-emerald-400 hover:text-white ml-1 text-[10px] bg-emerald-900/40 px-1.5 py-0.5 rounded">+ Add Role</button>
+                                    </th>
                                     <th class="py-3 px-4">Status</th>
                                     <th class="py-3 px-4 text-right">Admin Actions</th>
                                 </tr>
@@ -340,17 +346,29 @@
             switchTab('dashboard');
         }
 
+        function addNewRole() {
+            const newRoleName = prompt("Enter new role title to add to system list (e.g., Senior Auditor, Operations Manager):");
+            if(newRoleName && newRoleName.trim() !== '') {
+                const cleaned = newRoleName.trim();
+                if(!availableRoles.includes(cleaned)) {
+                    availableRoles.push(cleaned);
+                    alert(`Successfully added new role: "${cleaned}"`);
+                } else {
+                    alert("This role already exists in the system.");
+                }
+            }
+        }
+
         function editField(id, field) {
             const user = users.find(u => u.id === id);
             if(!user) return;
             if(field === 'role') {
-                const roles = ['Head Admin', 'Department Head', 'Finance Head', 'Purchasing Officer', 'Staff', 'Director'];
                 let promptMsg = `Select new Position / Role for ${user.name}:\n`;
-                roles.forEach((r, idx) => { promptMsg += `${idx + 1}. ${r}\n`; });
-                const choice = prompt(promptMsg + `\nEnter number (1-${roles.length}):`, "1");
+                availableRoles.forEach((r, idx) => { promptMsg += `${idx + 1}. ${r}\n`; });
+                const choice = prompt(promptMsg + `\nEnter number (1-${availableRoles.length}):`, "1");
                 const num = parseInt(choice);
-                if(num >= 1 && num <= roles.length) {
-                    user.role = roles[num - 1];
+                if(num >= 1 && num <= availableRoles.length) {
+                    user.role = availableRoles[num - 1];
                     renderContent();
                     alert(`Successfully updated role for user ${id} to ${user.role}.`);
                 }
@@ -378,16 +396,16 @@
             const newId = prompt("Edit User ID / Username:", user.id);
             const newName = prompt("Edit Full Name:", user.name);
             const newDept = prompt("Edit Department:", user.department);
-            const roles = ['Head Admin', 'Department Head', 'Finance Head', 'Purchasing Officer', 'Staff', 'Director'];
+            
             let promptMsg = `Select Position / Role for ${newName || user.name}:\n`;
-            roles.forEach((r, idx) => { promptMsg += `${idx + 1}. ${r}\n`; });
-            const choice = prompt(promptMsg + `\nEnter number (1-${roles.length}):`, "1");
+            availableRoles.forEach((r, idx) => { promptMsg += `${idx + 1}. ${r}\n`; });
+            const choice = prompt(promptMsg + `\nEnter number (1-${availableRoles.length}):`, "1");
             const num = parseInt(choice);
             
             if(newId) user.id = newId;
             if(newName) user.name = newName;
             if(newDept) user.department = newDept;
-            if(num >= 1 && num <= roles.length) user.role = roles[num - 1];
+            if(num >= 1 && num <= availableRoles.length) user.role = availableRoles[num - 1];
 
             renderContent();
             alert("User row successfully updated.");
