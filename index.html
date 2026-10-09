@@ -279,8 +279,8 @@
                                         </td>
                                         <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-900/40 text-emerald-300">${u.status}</span></td>
                                         <td class="py-3 px-4 text-right space-x-2">
-                                            <button onclick="editUserModal('${u.id}')" class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 hover:bg-indigo-600 hover:text-white px-2 py-1 rounded text-xs"><i class="fa-solid fa-pen-to-square"></i> Edit Row</button>
-                                            <button onclick="resetPassword('${u.id}')" class="bg-amber-600/30 border border-amber-500/50 text-amber-300 hover:bg-amber-600 hover:text-white px-2 py-1 rounded text-xs"><i class="fa-solid fa-key"></i></button>
+                                            <button onclick="editUserModal('${u.id}')" class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 hover:bg-indigo-600 hover:text-white px-2.5 py-1 rounded text-xs"><i class="fa-solid fa-pen-to-square"></i> Edit Row</button>
+                                            <button onclick="resetPassword('${u.id}')" class="bg-amber-600/30 border border-amber-500/50 text-amber-300 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded text-xs"><i class="fa-solid fa-key"></i></button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -343,11 +343,24 @@
         function editField(id, field) {
             const user = users.find(u => u.id === id);
             if(!user) return;
-            const newVal = prompt(`Edit ${field.toUpperCase()} for ${user.name}:`, user[field]);
-            if(newVal !== null && newVal.trim() !== '') {
-                user[field] = newVal.trim();
-                renderContent();
-                alert(`Successfully updated ${field} for user ${id}.`);
+            if(field === 'role') {
+                const roles = ['Head Admin', 'Department Head', 'Finance Head', 'Purchasing Officer', 'Staff', 'Director'];
+                let promptMsg = `Select new Position / Role for ${user.name}:\n`;
+                roles.forEach((r, idx) => { promptMsg += `${idx + 1}. ${r}\n`; });
+                const choice = prompt(promptMsg + `\nEnter number (1-${roles.length}):`, "1");
+                const num = parseInt(choice);
+                if(num >= 1 && num <= roles.length) {
+                    user.role = roles[num - 1];
+                    renderContent();
+                    alert(`Successfully updated role for user ${id} to ${user.role}.`);
+                }
+            } else {
+                const newVal = prompt(`Edit ${field.toUpperCase()} for ${user.name}:`, user[field]);
+                if(newVal !== null && newVal.trim() !== '') {
+                    user[field] = newVal.trim();
+                    renderContent();
+                    alert(`Successfully updated ${field} for user ${id}.`);
+                }
             }
         }
 
@@ -365,11 +378,17 @@
             const newId = prompt("Edit User ID / Username:", user.id);
             const newName = prompt("Edit Full Name:", user.name);
             const newDept = prompt("Edit Department:", user.department);
-            const newRole = prompt("Edit Position / Role:", user.role);
+            const roles = ['Head Admin', 'Department Head', 'Finance Head', 'Purchasing Officer', 'Staff', 'Director'];
+            let promptMsg = `Select Position / Role for ${newName || user.name}:\n`;
+            roles.forEach((r, idx) => { promptMsg += `${idx + 1}. ${r}\n`; });
+            const choice = prompt(promptMsg + `\nEnter number (1-${roles.length}):`, "1");
+            const num = parseInt(choice);
+            
             if(newId) user.id = newId;
             if(newName) user.name = newName;
             if(newDept) user.department = newDept;
-            if(newRole) user.role = newRole;
+            if(num >= 1 && num <= roles.length) user.role = roles[num - 1];
+
             renderContent();
             alert("User row successfully updated.");
         }
