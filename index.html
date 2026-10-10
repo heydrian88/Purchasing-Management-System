@@ -13,7 +13,7 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+                        brand: { 50: '#f4f7f0', 100: '#e5ecd8', 500: '#6b8e23', 600: '#5a781d', 700: '#486117', 900: '#2b3b0d' }
                     }
                 }
             }
@@ -33,11 +33,16 @@
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 space-y-6">
             <div class="text-center space-y-2">
-                <div class="w-14 h-14 bg-brand-600 rounded-2xl text-white font-bold text-2xl mx-auto flex items-center justify-center shadow-lg shadow-brand-500/30">
-                    <i class="fa-solid fa-boxes-stacked"></i>
+                <div class="w-16 h-16 bg-white rounded-2xl mx-auto flex items-center justify-center shadow-lg border border-slate-100 p-2">
+                    <svg viewBox="0 0 100 130" class="w-full h-full text-brand-600 fill-current">
+                        <path d="M15 15 H32 V62 L70 15 H92 L48 65 L95 115 H72 L32 70 V115 H15 Z" fill="#6B8E23"/>
+                        <path d="M40 20 C65 20 85 30 85 50 C85 70 50 72 50 88 C50 100 70 102 80 96 C85 93 88 100 82 106 C70 118 35 115 35 88 C35 65 70 62 70 48 C70 38 52 35 40 42 Z" fill="#6B8E23" opacity="0.9"/>
+                        <path d="M38 55 Q55 35 78 50 Q60 65 38 55 Z" fill="#ffffff" opacity="0.3"/>
+                        <path d="M42 54 Q55 42 72 51" stroke="#6B8E23" stroke-width="2" fill="none"/>
+                    </svg>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-900">Kamana Sanctuary</h2>
-                <p class="text-xs text-slate-500">Resort & Spa Purchasing Management System</p>
+                <p class="text-xs text-slate-500">Resort and Spa Purchasing Management System</p>
             </div>
 
             <form onsubmit="handleLogin(event)" class="space-y-4">
@@ -86,12 +91,16 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             <!-- Logo & Brand -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
-                    <i class="fa-solid fa-hotel"></i>
+                <div class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shadow-md border border-slate-100 p-1.5">
+                    <svg viewBox="0 0 100 130" class="w-full h-full">
+                        <path d="M15 15 H32 V62 L70 15 H92 L48 65 L95 115 H72 L32 70 V115 H15 Z" fill="#6B8E23"/>
+                        <path d="M40 20 C65 20 85 30 85 50 C85 70 50 72 50 88 C50 100 70 102 80 96 C85 93 88 100 82 106 C70 118 35 115 35 88 C35 65 70 62 70 48 C70 38 52 35 40 42 Z" fill="#6B8E23" opacity="0.9"/>
+                        <path d="M42 54 Q55 42 72 51" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+                    </svg>
                 </div>
                 <div>
-                    <span class="text-xs font-semibold uppercase tracking-wider text-brand-600">Subic Bay Enterprise</span>
-                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Kamana Sanctuary</h1>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-brand-600">Nabasan Subic Development Corporation</span>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Kamana Sanctuary Resort and Spa</h1>
                 </div>
             </div>
 
@@ -135,6 +144,9 @@
             </button>
             <button onclick="switchTab('create-po')" id="nav-create-po" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
                 <i class="fa-solid fa-file-invoice-dollar"></i> Create Purchase Order
+            </button>
+            <button onclick="switchTab('approved-pos')" id="nav-approved-pos" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-file-circle-check text-emerald-600"></i> Approved POs <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 rounded">Active</span>
             </button>
             <button onclick="switchTab('requisitions')" id="nav-requisitions" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
                 <i class="fa-solid fa-cart-shopping"></i> Requisitions
@@ -320,15 +332,15 @@
                                     <td class="p-3"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold">Pending</span></td>
                                     <td class="p-3 text-right"><button onclick="showDetailModal('PO-2026-4402', 'Dell Direct Philippines', '₱1,012,000.00', 'Pending', 'Server Equipment')" class="px-3 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 rounded-lg text-xs font-semibold transition-colors">Details</button></td>
                                 </tr>
-                                <tr>
-                                    <td class="p-3 font-mono font-semibold text-slate-900">PO-2026-4401</td>
+                                <tr class="bg-emerald-50/30">
+                                    <td class="p-3 font-mono font-bold text-emerald-800">PO-2026-4401</td>
                                     <td class="p-3">
                                         <p class="font-medium text-slate-900">TechSupply PH Corp.</p>
                                         <p class="text-xs text-slate-400">Network Switches & Cables</p>
                                     </td>
                                     <td class="p-3 font-semibold">₱233,750.00</td>
-                                    <td class="p-3"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">Approved</span></td>
-                                    <td class="p-3 text-right"><button onclick="showDetailModal('PO-2026-4401', 'TechSupply PH Corp.', '₱233,750.00', 'Approved', 'Network Switches')" class="px-3 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 rounded-lg text-xs font-semibold transition-colors">Details</button></td>
+                                    <td class="p-3"><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Approved</span></td>
+                                    <td class="p-3 text-right"><button onclick="showDetailModal('PO-2026-4401', 'TechSupply PH Corp.', '₱233,750.00', 'Approved', 'Network Switches & Cables')" class="px-3 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-xs font-semibold transition-colors shadow-xs">View Approved PO</button></td>
                                 </tr>
                                 <tr>
                                     <td class="p-3 font-mono font-semibold text-slate-900">REQ-2026-0105</td>
@@ -347,48 +359,61 @@
             </div>
         </div>
 
-        <!-- ================= USER MANAGEMENT (ADMIN ONLY) TAB ================= -->
-        <div id="tab-users" class="space-y-6 hidden fade-in">
+        <!-- ================= APPROVED PURCHASE ORDERS TAB ================= -->
+        <div id="tab-approved-pos" class="space-y-6 hidden fade-in">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Admin Control Panel</span>
-                    <h2 class="text-2xl font-bold text-slate-900">User Management & Registration</h2>
+                    <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Authorized Procurement Documents
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">Approved Purchase Orders</h2>
                 </div>
-                <button onclick="openModal('registerUserModal')" class="px-4 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 shadow-sm transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus"></i> Register New User
+                <button onclick="switchTab('create-po')" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Issue New PO
                 </button>
             </div>
 
-            <!-- Users List Table -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
-                <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                    <div class="relative flex-1 max-w-sm">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                            <i class="fa-solid fa-search text-xs"></i>
-                        </span>
-                        <input type="text" id="userSearchInput" onkeyup="filterUsersTable()" placeholder="Search users by name, username, dept..." 
-                               class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
-                    <p class="text-xs text-slate-500 flex items-center gap-1.5">
-                        <i class="fa-solid fa-shield-halved text-amber-500"></i> Admin privileges enabled: All user profiles editable.
-                    </p>
-                </div>
-
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
                             <tr>
-                                <th class="p-3 rounded-l-lg">User</th>
-                                <th class="p-3">Username</th>
-                                <th class="p-3">Department</th>
-                                <th class="p-3">Position</th>
-                                <th class="p-3">Role</th>
+                                <th class="p-3 rounded-l-lg">PO Ref No.</th>
+                                <th class="p-3">Vendor / Supplier</th>
+                                <th class="p-3">Description</th>
+                                <th class="p-3">Amount (₱)</th>
+                                <th class="p-3">Approval Date</th>
                                 <th class="p-3">Status</th>
-                                <th class="p-3 rounded-r-lg text-right">Actions</th>
+                                <th class="p-3 rounded-r-lg text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="usersTableBody" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- Dynamically generated via JS -->
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-mono font-bold text-brand-600">PO-2026-4401</td>
+                                <td class="p-3 font-semibold text-slate-900">TechSupply PH Corp.</td>
+                                <td class="p-3 text-slate-600">Network Switches & Cables</td>
+                                <td class="p-3 font-mono font-bold text-slate-900">₱233,750.00</td>
+                                <td class="p-3 text-xs text-slate-500">2026-10-10 14:02</td>
+                                <td class="p-3"><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full text-xs font-bold"><i class="fa-solid fa-circle-check mr-1"></i>Approved</span></td>
+                                <td class="p-3 text-right">
+                                    <button onclick="showDetailModal('PO-2026-4401', 'TechSupply PH Corp.', '₱233,750.00', 'Approved', 'Network Switches & Cables')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs">
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-mono font-bold text-brand-600">PO-2026-4398</td>
+                                <td class="p-3 font-semibold text-slate-900">Global Office Logistics Manila</td>
+                                <td class="p-3 text-slate-600">Executive Conference Tables</td>
+                                <td class="p-3 font-mono font-bold text-slate-900">₱412,000.00</td>
+                                <td class="p-3 text-xs text-slate-500">2026-10-08 09:15</td>
+                                <td class="p-3"><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full text-xs font-bold"><i class="fa-solid fa-circle-check mr-1"></i>Approved</span></td>
+                                <td class="p-3 text-right">
+                                    <button onclick="showDetailModal('PO-2026-4398', 'Global Office Logistics Manila', '₱412,000.00', 'Approved', 'Executive Conference Tables')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs">
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -583,6 +608,48 @@
             </div>
         </div>
 
+        <!-- ================= USER MANAGEMENT TAB ================= -->
+        <div id="tab-users" class="space-y-6 hidden fade-in">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Administration</span>
+                    <h2 class="text-2xl font-bold text-slate-900">User Management</h2>
+                </div>
+                <button onclick="openModal('registerUserModal')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Register New User
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
+                <div class="relative max-w-sm">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-search text-xs"></i>
+                    </span>
+                    <input type="text" id="userSearchInput" onkeyup="filterUsersTable()" placeholder="Search users by name, role, or position..." 
+                           class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3 rounded-l-lg">User Name</th>
+                                <th class="p-3">Username</th>
+                                <th class="p-3">Department</th>
+                                <th class="p-3">Position</th>
+                                <th class="p-3">Role</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 rounded-r-lg text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Dynamic User Entries -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ================= AUDIT LOGS TAB ================= -->
         <div id="tab-audit-logs" class="space-y-6 hidden fade-in">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -638,9 +705,49 @@
 
         <!-- ================= ANALYTICS TAB ================= -->
         <div id="tab-analytics" class="space-y-6 hidden fade-in">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-                <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Financial Intelligence (PHP)</span>
-                <h2 class="text-2xl font-bold text-slate-900">Spend Analytics (₱)</h2>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Financial Intelligence (PHP)</span>
+                    <h2 class="text-2xl font-bold text-slate-900">Spend Analytics (₱)</h2>
+                </div>
+                <button onclick="showNotificationModal('Analytics report exported as PDF/Excel successfully.')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Export Analytics Report
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex justify-between items-center text-xs font-bold uppercase text-slate-400">
+                        <span>IT & Engineering</span>
+                        <span class="text-brand-600">₱3,450,000.00</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-brand-600 h-full rounded-full" style="width: 44%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">44% of total Q4 expenditure</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex justify-between items-center text-xs font-bold uppercase text-slate-400">
+                        <span>Operations & Facilities</span>
+                        <span class="text-emerald-600">₱2,810,000.00</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full" style="width: 36%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">36% of total Q4 expenditure</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex justify-between items-center text-xs font-bold uppercase text-slate-400">
+                        <span>Human Resources & Admin</span>
+                        <span class="text-amber-600">₱1,570,000.00</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full" style="width: 20%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">20% of total Q4 expenditure</p>
+                </div>
             </div>
         </div>
 
@@ -997,7 +1104,7 @@
 
         // Tab Switcher
         function switchTab(tabId) {
-            const tabs = ['dashboard', 'create-po', 'requisitions', 'vendors', 'users', 'audit-logs', 'analytics'];
+            const tabs = ['dashboard', 'create-po', 'approved-pos', 'requisitions', 'vendors', 'users', 'audit-logs', 'analytics'];
             tabs.forEach(t => {
                 const el = document.getElementById('tab-' + t);
                 const nav = document.getElementById('nav-' + t);
@@ -1123,6 +1230,7 @@
         // User Management CRUD Functions
         function renderUsersTable() {
             const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
             usersData.forEach((u) => {
