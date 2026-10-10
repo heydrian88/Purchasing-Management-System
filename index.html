@@ -1,37 +1,1425 @@
-<style>
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    font-family: system-ui, -apple-system, sans-serif;
-  }
-  .kpi-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  .kpi-title { font-size: 0.875rem; color: #6b7280; margin: 0 0 8px 0; }
-  .kpi-value { font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0; }
-  .kpi-subtext { font-size: 0.75rem; color: #059669; margin-top: 6px; }
-  .badge-warning { color: #d97706; }
-</style>
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamana Sanctuary Resort and Spa - Purchasing Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 0.25s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-100 font-sans text-slate-800 antialiased flex flex-col">
 
-<div class="dashboard-grid">
-  <div class="kpi-card">
-    <p class="kpi-title">Pending Approvals</p>
-    <p class="kpi-value">5</p>
-    <p class="kpi-subtext badge-warning">⚠️ Requires immediate review</p>
-  </div>
-  <div class="kpi-card">
-    <p class="kpi-title">Active POs</p>
-    <p class="kpi-value">14</p>
-    <p class="kpi-subtext">Totaling $88,400</p>
-  </div>
-  <div class="kpi-card">
-    <p class="kpi-title">Q4 Spend vs Budget</p>
-    <p class="kpi-value">$142.5k</p>
-    <p class="kpi-subtext">71% of $200k limit</p>
-  </div>
-</div>
+    <!-- LOGIN MODAL / SCREEN -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 bg-brand-600 rounded-2xl text-white font-bold text-2xl mx-auto flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">Kamana Sanctuary</h2>
+                <p class="text-xs text-slate-500">Resort & Spa Purchasing Management System</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUsername" required placeholder="Enter username" value="admin"
+                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="Enter password" value="cuteako"
+                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div id="loginError" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Invalid username or password. Please try again.</span>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md transition-all">
+                    Sign In to Workspace
+                </button>
+            </form>
+
+            <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500 space-y-1">
+                <p class="font-bold text-slate-700">Pre-configured Admin Credentials:</p>
+                <p>Username: <code class="text-brand-600 font-mono font-bold">admin</code></p>
+                <p>Password: <code class="text-brand-600 font-mono font-bold">cuteako</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header id="mainHeader" class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Logo & Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-brand-600">Subic Bay Enterprise</span>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Kamana Sanctuary</h1>
+                </div>
+            </div>
+
+            <!-- Global Search Bar -->
+            <div class="flex-1 max-w-md hidden md:block">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="globalSearch" placeholder="Search PO numbers, vendors, requisitions..." 
+                           class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+                </div>
+            </div>
+
+            <!-- User Menu & Notifications -->
+            <div class="flex items-center gap-3">
+                <button onclick="showNotificationModal('You have 3 system alerts and 2 budget approval reminders.')" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors" title="Notifications">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div class="h-6 w-px bg-slate-200"></div>
+                <div class="flex items-center gap-2 pl-1">
+                    <div id="currentUserAvatar" class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm border border-brand-200">
+                        AD
+                    </div>
+                    <div class="hidden lg:block text-left">
+                        <p id="currentUserName" class="text-xs font-bold text-slate-900">Administrator</p>
+                        <p id="currentUserRole" class="text-[10px] text-slate-500">Resort Admin</p>
+                    </div>
+                </div>
+                <button onclick="logoutUser()" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors ml-1" title="Log Out">
+                    <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sub Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-6 border-t border-slate-100 text-sm overflow-x-auto">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="py-3 font-semibold text-brand-600 border-b-2 border-brand-600 whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </button>
+            <button onclick="switchTab('create-po')" id="nav-create-po" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Create Purchase Order
+            </button>
+            <button onclick="switchTab('requisitions')" id="nav-requisitions" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping"></i> Requisitions
+            </button>
+            <button onclick="switchTab('vendors')" id="nav-vendors" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-building"></i> Vendors
+            </button>
+            <button onclick="switchTab('users')" id="nav-users" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-users-gear"></i> User Management <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded">Admin</span>
+            </button>
+            <button onclick="switchTab('audit-logs')" id="nav-audit-logs" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-list-check"></i> Audit Logs
+            </button>
+            <button onclick="switchTab('analytics')" id="nav-analytics" class="py-3 font-medium text-slate-600 hover:text-brand-600 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <i class="fa-solid fa-chart-line"></i> Spend Analytics
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ================= DASHBOARD TAB ================= -->
+        <div id="tab-dashboard" class="space-y-6 fade-in">
+            <!-- Welcome banner & Quick Actions -->
+            <div class="bg-gradient-to-r from-brand-900 to-brand-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="relative z-10">
+                    <span class="inline-block px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-medium text-blue-100 mb-2">
+                        <i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Currency Set: Philippine Peso (₱)
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, <span id="welcomeUserName">Admin</span>!</h2>
+                    <p class="text-blue-100 text-sm mt-1 max-w-xl">You have <span id="pendingCountBadge" class="font-bold underline">2 items</span> requiring authorization. Q4 PH budget is on track.</p>
+                </div>
+                <div class="relative z-10 flex flex-wrap gap-3 w-full md:w-auto">
+                    <button onclick="switchTab('create-po')" class="flex-1 md:flex-none px-4 py-2.5 bg-white text-brand-900 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-all shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus text-brand-600"></i> Issue New PO
+                    </button>
+                    <button onclick="openModal('quickReqModal')" class="flex-1 md:flex-none px-4 py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl font-semibold text-sm hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-receipt"></i> Quick Requisition
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard KPI Metric Cards (Philippine Peso ₱) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Pending Approvals</span>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 id="kpiPendingNum" class="text-3xl font-bold text-slate-900">2</h3>
+                        <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Action Required</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Requires managerial sign-off</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Purchase Orders</span>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-3xl font-bold text-slate-900">14</h3>
+                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">₱4,862,000 Total</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Open with suppliers</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Q4 Budget Spend (PHP)</span>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-3xl font-bold text-slate-900">₱7.83M</h3>
+                        <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">71% Limit</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full" style="width: 71%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Delayed Shipments</span>
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-3xl font-bold text-slate-900">2</h3>
+                        <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">Overdue</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Carrier tracking alerts active</p>
+                </div>
+            </div>
+
+            <!-- Approvals Queue & Recent Transactions -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Approvals Queue -->
+                <div class="lg:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-brand-600"></i> Approvals Queue
+                        </h3>
+                        <span id="approvalQueueBadge" class="bg-brand-50 text-brand-700 text-xs font-bold px-2.5 py-1 rounded-full">2 Pending</span>
+                    </div>
+                    
+                    <div id="approvalsQueueList" class="space-y-3 flex-1">
+                        <div id="approval-item-1" class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 transition-all">
+                            <div class="flex justify-between items-start mb-1">
+                                <button onclick="showDetailModal('REQ-2026-089', 'IT & Engineering (Sarah J.)', '₱687,500.00', 'Pending Approval', '10x Enterprise Workstations - High-performance developer laptops with 32GB RAM & 1TB SSD.')" class="text-xs font-mono font-bold text-brand-600 hover:underline hover:text-brand-700">REQ-2026-089</button>
+                                <span class="text-xs font-bold text-slate-900">₱687,500.00</span>
+                            </div>
+                            <p class="text-xs font-semibold text-slate-800">10x Enterprise Workstations</p>
+                            <p class="text-[11px] text-slate-500 mb-3">Requested by: IT Dept (Sarah J.)</p>
+                            <div class="flex gap-2">
+                                <button onclick="handleApproval(1, 'approved')" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-check"></i> Approve
+                                </button>
+                                <button onclick="handleApproval(1, 'rejected')" class="flex-1 py-1.5 bg-white border border-slate-300 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-xmark"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="approval-item-2" class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 transition-all">
+                            <div class="flex justify-between items-start mb-1">
+                                <button onclick="showDetailModal('REQ-2026-092', 'Human Resources (Marcus V.)', '₱176,000.00', 'Pending Approval', 'Ergonomic Office Chairs - 16x Mesh adjustable task chairs for HQ 3rd floor expansion.')" class="text-xs font-mono font-bold text-brand-600 hover:underline hover:text-brand-700">REQ-2026-092</button>
+                                <span class="text-xs font-bold text-slate-900">₱176,000.00</span>
+                            </div>
+                            <p class="text-xs font-semibold text-slate-800">Ergonomic Office Chairs</p>
+                            <p class="text-[11px] text-slate-500 mb-3">Requested by: HR Dept (Marcus V.)</p>
+                            <div class="flex gap-2">
+                                <button onclick="handleApproval(2, 'approved')" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-check"></i> Approve
+                                </button>
+                                <button onclick="handleApproval(2, 'rejected')" class="flex-1 py-1.5 bg-white border border-slate-300 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-xmark"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="noApprovalsMessage" class="hidden text-center py-8 text-slate-400 text-sm">
+                        <i class="fa-solid fa-circle-check text-3xl text-emerald-500 mb-2"></i>
+                        <p>All pending approvals cleared!</p>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions (₱ PHP) -->
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> Recent Transactions (PHP ₱)
+                        </h3>
+                        <button onclick="switchTab('requisitions')" class="text-xs font-semibold text-brand-600 hover:text-brand-800">View All →</button>
+                    </div>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-3 rounded-l-lg">ID / Ref</th>
+                                    <th class="p-3">Vendor / Item</th>
+                                    <th class="p-3">Amount (₱)</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 rounded-r-lg text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTransactionsTable" class="divide-y divide-slate-100 text-slate-700">
+                                <tr>
+                                    <td class="p-3 font-mono font-semibold text-slate-900">PO-2026-4402</td>
+                                    <td class="p-3">
+                                        <p class="font-medium text-slate-900">Dell Direct Philippines</p>
+                                        <p class="text-xs text-slate-400">Server Equipment</p>
+                                    </td>
+                                    <td class="p-3 font-semibold">₱1,012,000.00</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold">Pending</span></td>
+                                    <td class="p-3 text-right"><button onclick="showDetailModal('PO-2026-4402', 'Dell Direct Philippines', '₱1,012,000.00', 'Pending', 'Server Equipment')" class="px-3 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 rounded-lg text-xs font-semibold transition-colors">Details</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-mono font-semibold text-slate-900">PO-2026-4401</td>
+                                    <td class="p-3">
+                                        <p class="font-medium text-slate-900">TechSupply PH Corp.</p>
+                                        <p class="text-xs text-slate-400">Network Switches & Cables</p>
+                                    </td>
+                                    <td class="p-3 font-semibold">₱233,750.00</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">Approved</span></td>
+                                    <td class="p-3 text-right"><button onclick="showDetailModal('PO-2026-4401', 'TechSupply PH Corp.', '₱233,750.00', 'Approved', 'Network Switches')" class="px-3 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 rounded-lg text-xs font-semibold transition-colors">Details</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-mono font-semibold text-slate-900">REQ-2026-0105</td>
+                                    <td class="p-3">
+                                        <p class="font-medium text-slate-900">AWS Cloud Philippines</p>
+                                        <p class="text-xs text-slate-400">Cloud Infrastructure</p>
+                                    </td>
+                                    <td class="p-3 font-semibold">₱446,600.00</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">Ordered</span></td>
+                                    <td class="p-3 text-right"><button onclick="showDetailModal('REQ-2026-0105', 'AWS Cloud Philippines', '₱446,600.00', 'Ordered', 'Cloud Infrastructure')" class="px-3 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 rounded-lg text-xs font-semibold transition-colors">Details</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= USER MANAGEMENT (ADMIN ONLY) TAB ================= -->
+        <div id="tab-users" class="space-y-6 hidden fade-in">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Admin Control Panel</span>
+                    <h2 class="text-2xl font-bold text-slate-900">User Management & Registration</h2>
+                </div>
+                <button onclick="openModal('registerUserModal')" class="px-4 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Register New User
+                </button>
+            </div>
+
+            <!-- Users List Table -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+                <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+                    <div class="relative flex-1 max-w-sm">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fa-solid fa-search text-xs"></i>
+                        </span>
+                        <input type="text" id="userSearchInput" onkeyup="filterUsersTable()" placeholder="Search users by name, username, dept..." 
+                               class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <p class="text-xs text-slate-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-amber-500"></i> Admin privileges enabled: All user profiles editable.
+                    </p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3 rounded-l-lg">User</th>
+                                <th class="p-3">Username</th>
+                                <th class="p-3">Department</th>
+                                <th class="p-3">Position</th>
+                                <th class="p-3">Role</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 rounded-r-lg text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Dynamically generated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= CREATE PURCHASE ORDER TAB ================= -->
+        <div id="tab-create-po" class="space-y-6 hidden fade-in">
+            <div class="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Procurement Workflow (PHP ₱)</span>
+                    <h2 class="text-2xl font-bold text-slate-900">Create Purchase Order</h2>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveDraftPO()" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                        Save Draft
+                    </button>
+                    <button onclick="submitPOForm()" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 rounded-xl hover:bg-brand-700 shadow-sm transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Submit PO for Approval
+                    </button>
+                </div>
+            </div>
+
+            <!-- PO Form Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left 2 Cols -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                        <h3 class="font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-building text-brand-600"></i> Vendor & Order Details
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Select Supplier</label>
+                                <select id="poVendorSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="TechSupply PH Corp.">TechSupply PH Corp. (Preferred Supplier)</option>
+                                    <option value="Global Office Logistics Manila">Global Office Logistics Manila</option>
+                                    <option value="Dell Direct Philippines">Dell Direct Philippines</option>
+                                    <option value="AWS Cloud Philippines">AWS Cloud Philippines</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Cost Center / Dept</label>
+                                <select id="poDepartment" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option>104 - IT & Engineering</option>
+                                    <option>201 - Operations</option>
+                                    <option>305 - Human Resources</option>
+                                    <option>402 - Marketing</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Target Delivery Date</label>
+                                <input type="date" id="poDeliveryDate" value="2026-10-30" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Terms</label>
+                                <select id="poPaymentTerms" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option>Net 30 Days</option>
+                                    <option>Net 60 Days</option>
+                                    <option>Due Upon Receipt</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Line Items Table -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-list text-brand-600"></i> Purchase Line Items (Philippine Peso)
+                            </h3>
+                            <button onclick="addLineItem()" class="px-3 py-1.5 bg-brand-50 text-brand-700 hover:bg-brand-100 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Add Item
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100">
+                                        <th class="pb-3">Item Description / SKU</th>
+                                        <th class="pb-3 w-20">Qty</th>
+                                        <th class="pb-3 w-36">Unit Price (₱)</th>
+                                        <th class="pb-3 w-36 text-right">Total (₱)</th>
+                                        <th class="pb-3 w-12"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lineItemsTableBody" class="divide-y divide-slate-100">
+                                    <!-- Populated dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Col Summary -->
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                        <h3 class="font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-brand-600"></i> Cost Summary (PHP)
+                        </h3>
+                        <div class="space-y-3 text-sm text-slate-600">
+                            <div class="flex justify-between">
+                                <span>Subtotal</span>
+                                <span id="summarySubtotal" class="font-semibold text-slate-900">₱0.00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Estimated VAT (12%)</span>
+                                <span id="summaryTax" class="font-semibold text-slate-900">₱0.00</span>
+                            </div>
+                            <div class="flex justify-between"><span>Estimated Delivery</span><span>₱2,500.00</span></div>
+                            <div class="border-t border-slate-200 pt-3 flex justify-between text-base font-bold text-slate-900">
+                                <span>Grand Total</span>
+                                <span id="summaryGrandTotal" class="text-brand-600">₱0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= REQUISITIONS TAB ================= -->
+        <div id="tab-requisitions" class="space-y-6 hidden fade-in">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Workflow Management</span>
+                    <h2 class="text-2xl font-bold text-slate-900">Purchase Requisitions (₱ PHP)</h2>
+                </div>
+                <button onclick="openModal('quickReqModal')" class="px-4 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> New Requisition
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                        <tr>
+                            <th class="p-3 rounded-l-lg">Requisition ID</th>
+                            <th class="p-3">Department</th>
+                            <th class="p-3">Requested Items</th>
+                            <th class="p-3">Total Amount (₱)</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3 rounded-r-lg text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        <tr>
+                            <td class="p-3 font-mono font-semibold">REQ-2026-089</td>
+                            <td class="p-3">IT & Engineering</td>
+                            <td class="p-3">10x Enterprise Workstations</td>
+                            <td class="p-3 font-semibold">₱687,500.00</td>
+                            <td class="p-3"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold">Pending Approval</span></td>
+                            <td class="p-3 text-right"><button onclick="showDetailModal('REQ-2026-089', 'IT & Engineering', '₱687,500.00', 'Pending', '10x Enterprise Workstations')" class="text-brand-600 font-semibold text-xs hover:underline">View</button></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-mono font-semibold">REQ-2026-092</td>
+                            <td class="p-3">Human Resources</td>
+                            <td class="p-3">Ergonomic Office Chairs</td>
+                            <td class="p-3 font-semibold">₱176,000.00</td>
+                            <td class="p-3"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold">Pending Approval</span></td>
+                            <td class="p-3 text-right"><button onclick="showDetailModal('REQ-2026-092', 'Human Resources', '₱176,000.00', 'Pending', 'Ergonomic Office Chairs')" class="text-brand-600 font-semibold text-xs hover:underline">View</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================= VENDORS TAB ================= -->
+        <div id="tab-vendors" class="space-y-6 hidden fade-in">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Philippine Supplier Directory</span>
+                    <h2 class="text-2xl font-bold text-slate-900">Approved Vendors</h2>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h3 class="font-bold text-slate-900 text-lg">TechSupply PH Corp.</h3>
+                    <p class="text-xs text-slate-500">Hardware & IT Peripherals</p>
+                    <p class="text-xs text-slate-600 pt-2 border-t border-slate-100">Location: Makati City, Metro Manila</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h3 class="font-bold text-slate-900 text-lg">Global Office Logistics Manila</h3>
+                    <p class="text-xs text-slate-500">Facilities & Furniture</p>
+                    <p class="text-xs text-slate-600 pt-2 border-t border-slate-100">Location: Ortigas Center, Pasig</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h3 class="font-bold text-slate-900 text-lg">Dell Direct Philippines</h3>
+                    <p class="text-xs text-slate-500">Enterprise Server Solutions</p>
+                    <p class="text-xs text-slate-600 pt-2 border-t border-slate-100">Location: BGC, Taguig City</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= AUDIT LOGS TAB ================= -->
+        <div id="tab-audit-logs" class="space-y-6 hidden fade-in">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Security & Governance</span>
+                    <h2 class="text-2xl font-bold text-slate-900">System Audit Logs</h2>
+                </div>
+                <button onclick="clearAuditFilter()" class="px-3.5 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset Filters
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between gap-4">
+                    <div class="relative flex-1 max-w-sm">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fa-solid fa-search text-xs"></i>
+                        </span>
+                        <input type="text" id="auditSearchInput" onkeyup="filterAuditLogs()" placeholder="Search action, user, or reference ID..." 
+                               class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-slate-500">Category:</label>
+                        <select id="auditCategoryFilter" onchange="filterAuditLogs()" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="ALL">All Categories</option>
+                            <option value="APPROVAL">Approvals</option>
+                            <option value="REQUISITION">Requisitions</option>
+                            <option value="PO">Purchase Orders</option>
+                            <option value="USER">User Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3 rounded-l-lg">Timestamp</th>
+                                <th class="p-3">User / Actor</th>
+                                <th class="p-3">Action</th>
+                                <th class="p-3">Category</th>
+                                <th class="p-3">Details / Reference</th>
+                                <th class="p-3 rounded-r-lg text-right">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogsTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Dynamic Audit Entries -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ANALYTICS TAB ================= -->
+        <div id="tab-analytics" class="space-y-6 hidden fade-in">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+                <span class="text-xs font-semibold text-brand-600 uppercase tracking-wider">Financial Intelligence (PHP)</span>
+                <h2 class="text-2xl font-bold text-slate-900">Spend Analytics (₱)</h2>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: REGISTER NEW USER -->
+    <div id="registerUserModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-lg">Register New User</h3>
+                    <p class="text-xs text-slate-500">Add a team member to Kamana Sanctuary workspace</p>
+                </div>
+                <button onclick="closeModal('registerUserModal')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form onsubmit="handleRegisterUser(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Username</label>
+                        <input type="text" id="regUsername" required placeholder="e.g. jdoe" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Full Name</label>
+                        <input type="text" id="regName" required placeholder="e.g. John Doe" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Department</label>
+                        <select id="regDepartment" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="IT & Engineering">IT & Engineering</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Finance & Accounting">Finance & Accounting</option>
+                            <option value="Procurement">Procurement</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Position</label>
+                        <input type="text" id="regPosition" required placeholder="e.g. Purchasing Officer" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Status</label>
+                        <select id="regStatus" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Role</label>
+                        <select id="regRole" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="Employee">Employee</option>
+                            <option value="Purchasing Officer">Purchasing Officer</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Administrator">Administrator</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('registerUserModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm">Save & Register User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT USER (ADMIN ACCESS) -->
+    <div id="editUserModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-lg">Edit User Profile</h3>
+                    <p class="text-xs text-slate-500">Admin Modification Panel</p>
+                </div>
+                <button onclick="closeModal('editUserModal')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form onsubmit="handleSaveEditUser(event)" class="space-y-3">
+                <input type="hidden" id="editUserOriginalUsername">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Username</label>
+                        <input type="text" id="editUsername" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Full Name</label>
+                        <input type="text" id="editName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Department</label>
+                        <select id="editDepartment" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            <option value="IT & Engineering">IT & Engineering</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Finance & Accounting">Finance & Accounting</option>
+                            <option value="Procurement">Procurement</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Executive Management">Executive Management</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Position</label>
+                        <input type="text" id="editPosition" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Status</label>
+                        <select id="editStatus" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Role</label>
+                        <select id="editRole" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            <option value="Employee">Employee</option>
+                            <option value="Purchasing Officer">Purchasing Officer</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Administrator">Administrator</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('editUserModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">System Alert</h3>
+                    <p class="text-xs text-slate-500">Kamana Sanctuary Assistant</p>
+                </div>
+            </div>
+            <p id="notificationText" class="text-sm text-slate-600 leading-relaxed"></p>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal('notificationModal')" class="px-5 py-2 bg-brand-600 text-white rounded-xl text-sm font-semibold">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TRANSACTION DETAILS -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div>
+                    <span id="detailTypeBadge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-brand-50 text-brand-600">Transaction Detail</span>
+                    <h3 id="detailModalTitle" class="font-bold text-slate-900 text-xl mt-1">PO-2026-0000</h3>
+                </div>
+                <button onclick="closeModal('detailModal')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-3 text-sm">
+                <div class="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">Vendor / Entity</p>
+                        <p id="detailVendor" class="font-semibold text-slate-800">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">Total Amount</p>
+                        <p id="detailAmount" class="font-bold text-slate-900 font-mono">-</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">Status</p>
+                        <p id="detailStatus" class="font-semibold text-brand-600">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">Currency</p>
+                        <p class="font-semibold text-slate-800">Philippine Peso (₱)</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Requested Line Items</p>
+                        <button onclick="addModalItem()" class="px-2.5 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Add Item
+                        </button>
+                    </div>
+                    <div id="detailItemsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- Dynamic items loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <button onclick="saveModalItems()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-colors">Save Changes</button>
+                <button onclick="closeModal('detailModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-200">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK REQUISITION MODAL -->
+    <div id="quickReqModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-lg">New Purchase Requisition</h3>
+                    <p class="text-xs text-slate-500">Submit multi-line request with custom item lines</p>
+                </div>
+                <button onclick="closeModal('quickReqModal')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form onsubmit="handleQuickReq(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Department</label>
+                        <select id="quickReqDept" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="IT & Engineering">IT & Engineering</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Marketing">Marketing</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Priority</label>
+                        <select id="quickReqPriority" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="Normal">Normal</option>
+                            <option value="Urgent">Urgent</option>
+                            <option value="High Priority">High Priority</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Multi line items container -->
+                <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/50 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Requisition Items</span>
+                        <button type="button" onclick="addQuickReqLine()" class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Add Line
+                        </button>
+                    </div>
+
+                    <div id="quickReqLinesContainer" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-xs font-bold text-slate-900">
+                        <span>Total Estimated Cost:</span>
+                        <span id="quickReqTotalCost" class="text-brand-600 font-mono text-sm">₱0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('quickReqModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Audit Logs Database
+        let auditLogsData = [
+            { timestamp: '2026-10-10 17:42:10', user: 'System Administrator', action: 'Login Success', category: 'USER', details: 'User admin authenticated via standard workspace credentials.', ip: '192.168.1.102' },
+            { timestamp: '2026-10-10 16:15:30', user: 'Sarah Jenkins', action: 'Created Requisition', category: 'REQUISITION', details: 'Submitted REQ-2026-089 (10x Enterprise Workstations) valued at ₱687,500.00', ip: '10.0.4.15' },
+            { timestamp: '2026-10-10 14:02:11', user: 'Marcus Chen', action: 'Approved Order', category: 'APPROVAL', details: 'Approved PO-2026-4401 for TechSupply PH Corp.', ip: '10.0.2.88' },
+            { timestamp: '2026-10-10 11:20:00', user: 'System Administrator', action: 'Updated User Profile', category: 'USER', details: 'Modified access level for @jdelacruz to Purchasing Officer.', ip: '192.168.1.102' }
+        ];
+
+        // Default Pre-configured Users Database
+        let usersData = [
+            { username: 'admin', name: 'System Administrator', department: 'Executive Management', position: 'Chief Procurement Officer', status: 'Active', role: 'Administrator' },
+            { username: 'mchen', name: 'Marcus Chen', department: 'IT & Engineering', position: 'Lead DevOps Engineer', status: 'Active', role: 'Employee' },
+            { username: 'sjenkins', name: 'Sarah Jenkins', department: 'Human Resources', position: 'HR Lead', status: 'Active', role: 'Manager' },
+            { username: 'jdelacruz', name: 'Juan Dela Cruz', department: 'Procurement', position: 'Purchasing Officer', status: 'Active', role: 'Purchasing Officer' }
+        ];
+
+        let currentUser = null;
+
+        // Log action helper
+        function logAudit(action, category, details) {
+            const now = new Date();
+            const timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
+            const user = currentUser ? currentUser.name : 'System/Guest';
+            auditLogsData.unshift({
+                timestamp,
+                user,
+                action,
+                category,
+                details,
+                ip: '192.168.1.' + Math.floor(Math.random() * 200 + 10)
+            });
+            renderAuditLogs();
+        }
+
+        // Authentication Handler
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            if (u === 'admin' && p === 'cuteako') {
+                currentUser = usersData[0]; // Admin
+                loginSuccess();
+            } else {
+                const found = usersData.find(usr => usr.username.toLowerCase() === u.toLowerCase());
+                if (found && p === 'cuteako') {
+                    currentUser = found;
+                    loginSuccess();
+                } else {
+                    errorEl.classList.remove('hidden');
+                }
+            }
+        }
+
+        function loginSuccess() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('loginError').classList.add('hidden');
+            
+            // Update User Header Info
+            document.getElementById('currentUserName').innerText = currentUser.name;
+            document.getElementById('currentUserRole').innerText = currentUser.role;
+            document.getElementById('welcomeUserName').innerText = currentUser.name;
+            
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('currentUserAvatar').innerText = initials;
+
+            logAudit('Login Success', 'USER', `User logged in as ${currentUser.role}`);
+            renderUsersTable();
+            renderAuditLogs();
+        }
+
+        function logoutUser() {
+            logAudit('User Logout', 'USER', 'Active session ended.');
+            currentUser = null;
+            document.getElementById('loginOverlay').classList.remove('hidden');
+        }
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            const tabs = ['dashboard', 'create-po', 'requisitions', 'vendors', 'users', 'audit-logs', 'analytics'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                const nav = document.getElementById('nav-' + t);
+                if (el) el.classList.add('hidden');
+                if (nav) {
+                    nav.classList.remove('text-brand-600', 'border-brand-600');
+                    nav.classList.add('text-slate-600', 'border-transparent');
+                }
+            });
+            const activeEl = document.getElementById('tab-' + tabId);
+            const activeNav = document.getElementById('nav-' + tabId);
+            if (activeEl) activeEl.classList.remove('hidden');
+            if (activeNav) {
+                activeNav.classList.remove('text-slate-600', 'border-transparent');
+                activeNav.classList.add('text-brand-600', 'border-brand-600');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Audit Logs Rendering & Filtering
+        function renderAuditLogs() {
+            const tbody = document.getElementById('auditLogsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            auditLogsData.forEach(log => {
+                const tr = document.createElement('tr');
+                
+                let categoryBadge = 'bg-slate-100 text-slate-700';
+                if (log.category === 'APPROVAL') categoryBadge = 'bg-emerald-50 text-emerald-700';
+                if (log.category === 'REQUISITION') categoryBadge = 'bg-blue-50 text-blue-700';
+                if (log.category === 'PO') categoryBadge = 'bg-purple-50 text-purple-700';
+                if (log.category === 'USER') categoryBadge = 'bg-amber-50 text-amber-700';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-xs text-slate-500">${log.timestamp}</td>
+                    <td class="p-3 font-semibold text-slate-900">${log.user}</td>
+                    <td class="p-3 font-medium text-slate-800">${log.action}</td>
+                    <td class="p-3"><span class="px-2.5 py-1 ${categoryBadge} rounded-md text-[11px] font-bold tracking-wide uppercase">${log.category}</span></td>
+                    <td class="p-3 text-xs text-slate-600 max-w-xs truncate" title="${log.details}">${log.details}</td>
+                    <td class="p-3 text-right font-mono text-xs text-slate-400">${log.ip}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterAuditLogs() {
+            const query = document.getElementById('auditSearchInput').value.toLowerCase();
+            const cat = document.getElementById('auditCategoryFilter').value;
+            const rows = document.querySelectorAll('#auditLogsTableBody tr');
+
+            rows.forEach((row, index) => {
+                const log = auditLogsData[index];
+                if (!log) return;
+                const matchesQuery = (log.user + log.action + log.details + log.timestamp).toLowerCase().includes(query);
+                const matchesCat = (cat === 'ALL' || log.category === cat);
+                row.style.display = (matchesQuery && matchesCat) ? '' : 'none';
+            });
+        }
+
+        function clearAuditFilter() {
+            document.getElementById('auditSearchInput').value = '';
+            document.getElementById('auditCategoryFilter').value = 'ALL';
+            filterAuditLogs();
+        }
+
+        // Quick Requisition Dynamic Line Items Logic
+        let quickReqLines = [
+            { desc: 'Ergonomic Office Keyboard & Mouse', qty: 2, unitPrice: 3500.00 }
+        ];
+
+        function renderQuickReqLines() {
+            const container = document.getElementById('quickReqLinesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (quickReqLines.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic py-2">No lines added yet. Click "+ Add Line" to include requisition items.</p>`;
+                document.getElementById('quickReqTotalCost').innerText = '₱0.00';
+                return;
+            }
+
+            let totalCost = 0;
+
+            quickReqLines.forEach((line, index) => {
+                const lineTotal = (line.qty || 0) * (line.unitPrice || 0);
+                totalCost += lineTotal;
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200 text-xs';
+                row.innerHTML = `
+                    <input type="text" value="${line.desc}" onchange="updateQuickReqLine(${index}, 'desc', this.value)" placeholder="Item Name / Spec" class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-brand-500">
+                    <input type="number" min="1" value="${line.qty}" onchange="updateQuickReqLine(${index}, 'qty', this.value)" placeholder="Qty" class="w-16 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-center font-medium">
+                    <input type="number" step="0.01" value="${line.unitPrice}" onchange="updateQuickReqLine(${index}, 'unitPrice', this.value)" placeholder="Price (₱)" class="w-28 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono">
+                    <span class="w-24 text-right font-mono font-semibold text-slate-800">₱${lineTotal.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                    <button type="button" onclick="removeQuickReqLine(${index})" class="p-1.5 text-slate-400 hover:text-rose-600"><i class="fa-solid fa-trash text-xs"></i></button>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('quickReqTotalCost').innerText = '₱' + totalCost.toLocaleString('en-PH', {minimumFractionDigits: 2});
+        }
+
+        function addQuickReqLine() {
+            quickReqLines.push({ desc: '', qty: 1, unitPrice: 0.00 });
+            renderQuickReqLines();
+        }
+
+        function removeQuickReqLine(index) {
+            quickReqLines.splice(index, 1);
+            renderQuickReqLines();
+        }
+
+        function updateQuickReqLine(index, field, val) {
+            if (field === 'qty' || field === 'unitPrice') {
+                quickReqLines[index][field] = parseFloat(val) || 0;
+            } else {
+                quickReqLines[index][field] = val;
+            }
+            renderQuickReqLines();
+        }
+
+        // User Management CRUD Functions
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            usersData.forEach((u) => {
+                const tr = document.createElement('tr');
+                
+                let statusBadge = 'bg-emerald-50 text-emerald-700';
+                if (u.status === 'Inactive') statusBadge = 'bg-slate-100 text-slate-600';
+                if (u.status === 'Suspended') statusBadge = 'bg-rose-50 text-rose-700';
+
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <p class="font-bold text-slate-900">${u.name}</p>
+                    </td>
+                    <td class="p-3 font-mono text-xs text-brand-600 font-bold">@${u.username}</td>
+                    <td class="p-3">${u.department}</td>
+                    <td class="p-3">${u.position}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-xs font-semibold">${u.role}</span></td>
+                    <td class="p-3"><span class="px-2.5 py-1 ${statusBadge} rounded-full text-xs font-semibold">${u.status}</span></td>
+                    <td class="p-3 text-right">
+                        <button onclick="openEditUserModal('${u.username}')" class="px-3 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-lg text-xs font-bold transition-colors">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleRegisterUser(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const name = document.getElementById('regName').value.trim();
+            const department = document.getElementById('regDepartment').value;
+            const position = document.getElementById('regPosition').value.trim();
+            const status = document.getElementById('regStatus').value;
+            const role = document.getElementById('regRole').value;
+
+            if (usersData.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showNotificationModal('Username already exists! Please choose another.');
+                return;
+            }
+
+            usersData.push({ username, name, department, position, status, role });
+            logAudit('Registered New User', 'USER', `Created account @${username} (${name}) as ${role}`);
+            renderUsersTable();
+            closeModal('registerUserModal');
+            showNotificationModal(`New user ${name} (@${username}) registered successfully.`);
+            e.target.reset();
+        }
+
+        function openEditUserModal(username) {
+            const user = usersData.find(u => u.username === username);
+            if (!user) return;
+
+            document.getElementById('editUserOriginalUsername').value = user.username;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editName').value = user.name;
+            document.getElementById('editDepartment').value = user.department;
+            document.getElementById('editPosition').value = user.position;
+            document.getElementById('editStatus').value = user.status;
+            document.getElementById('editRole').value = user.role;
+
+            openModal('editUserModal');
+        }
+
+        function handleSaveEditUser(e) {
+            e.preventDefault();
+            const origUsername = document.getElementById('editUserOriginalUsername').value;
+            const index = usersData.findIndex(u => u.username === origUsername);
+            
+            if (index !== -1) {
+                usersData[index] = {
+                    username: document.getElementById('editUsername').value.trim(),
+                    name: document.getElementById('editName').value.trim(),
+                    department: document.getElementById('editDepartment').value,
+                    position: document.getElementById('editPosition').value.trim(),
+                    status: document.getElementById('editStatus').value,
+                    role: document.getElementById('editRole').value
+                };
+                logAudit('Updated User Profile', 'USER', `Modified account info for @${origUsername}`);
+                renderUsersTable();
+                closeModal('editUserModal');
+                showNotificationModal('User details updated successfully.');
+            }
+        }
+
+        function filterUsersTable() {
+            const query = document.getElementById('userSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#usersTableBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // Philippine Peso PO Line Items Logic
+        let lineItems = [
+            { id: 1, desc: '15" Developer Workstation (SKU-PH9021)', qty: 5, price: 98000.00 },
+            { id: 2, desc: '27" 4K IPS Ergonomic Monitor (SKU-PH4410)', qty: 10, price: 19500.00 }
+        ];
+
+        function renderLineItems() {
+            const tbody = document.getElementById('lineItemsTableBody');
+            tbody.innerHTML = '';
+            let subtotal = 0;
+
+            lineItems.forEach((item, index) => {
+                const total = item.qty * item.price;
+                subtotal += total;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2"><input type="text" value="${item.desc}" onchange="updateLineItem(${index}, 'desc', this.value)" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"></td>
+                    <td class="py-2"><input type="number" min="1" value="${item.qty}" onchange="updateLineItem(${index}, 'qty', this.value)" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-center"></td>
+                    <td class="py-2"><input type="number" step="0.01" value="${item.price}" onchange="updateLineItem(${index}, 'price', this.value)" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-right font-mono"></td>
+                    <td class="py-2 text-right font-mono font-semibold text-slate-900">₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                    <td class="py-2 text-center"><button onclick="removeLineItem(${index})" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-trash text-xs"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const tax = subtotal * 0.12;
+            const delivery = 2500;
+            const grandTotal = subtotal + tax + delivery;
+
+            document.getElementById('summarySubtotal').innerText = '₱' + subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('summaryTax').innerText = '₱' + tax.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('summaryGrandTotal').innerText = '₱' + grandTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+        }
+
+        function addLineItem() {
+            lineItems.push({ id: Date.now(), desc: 'New Item', qty: 1, price: 0.00 });
+            renderLineItems();
+        }
+
+        function removeLineItem(index) {
+            lineItems.splice(index, 1);
+            renderLineItems();
+        }
+
+        function updateLineItem(index, field, val) {
+            if (field === 'qty' || field === 'price') {
+                lineItems[index][field] = parseFloat(val) || 0;
+            } else {
+                lineItems[index][field] = val;
+            }
+            renderLineItems();
+        }
+
+        let currentDetailItems = [];
+
+        function showModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        function openModal(id) {
+            if (id === 'quickReqModal') {
+                renderQuickReqLines();
+            }
+            showModal(id);
+        }
+
+        function showNotificationModal(message) {
+            document.getElementById('notificationText').innerText = message;
+            showModal('notificationModal');
+        }
+
+        // Show Transaction Detail Modal with Dynamic Items and "Add Item" functionality
+        function showDetailModal(id, vendor, amount, status, description) {
+            document.getElementById('detailModalTitle').innerText = id;
+            document.getElementById('detailVendor').innerText = vendor;
+            document.getElementById('detailAmount').innerText = amount;
+            document.getElementById('detailStatus').innerText = status;
+
+            // Convert initial string description into dynamic array format
+            currentDetailItems = [{ id: Date.now(), name: description, price: parseFloat(amount.replace(/[^0-9.-]+/g, '')) || 0, qty: 1 }];
+            renderModalItems();
+            openModal('detailModal');
+        }
+
+        function renderModalItems() {
+            const container = document.getElementById('detailItemsContainer');
+            container.innerHTML = '';
+
+            if (currentDetailItems.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic">No line items in this request.</p>`;
+                return;
+            }
+
+            currentDetailItems.forEach((item, index) => {
+                const itemRow = document.createElement('div');
+                itemRow.className = 'flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 text-xs';
+                itemRow.innerHTML = `
+                    <input type="text" value="${item.name}" onchange="updateModalItem(${index}, 'name', this.value)" placeholder="Item Description" class="flex-1 p-1.5 bg-slate-50 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-brand-500">
+                    <input type="number" min="1" value="${item.qty}" onchange="updateModalItem(${index}, 'qty', this.value)" placeholder="Qty" class="w-14 p-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-center">
+                    <input type="number" step="0.01" value="${item.price}" onchange="updateModalItem(${index}, 'price', this.value)" placeholder="Amount" class="w-24 p-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-mono">
+                    <button onclick="removeModalItem(${index})" class="text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                `;
+                container.appendChild(itemRow);
+            });
+            recalculateModalTotal();
+        }
+
+        function addModalItem() {
+            currentDetailItems.push({ id: Date.now(), name: 'New Item Requirement', price: 1000.00, qty: 1 });
+            renderModalItems();
+        }
+
+        function removeModalItem(index) {
+            currentDetailItems.splice(index, 1);
+            renderModalItems();
+        }
+
+        function updateModalItem(index, field, val) {
+            if (field === 'qty' || field === 'price') {
+                currentDetailItems[index][field] = parseFloat(val) || 0;
+            } else {
+                currentDetailItems[index][field] = val;
+            }
+            recalculateModalTotal();
+        }
+
+        function recalculateModalTotal() {
+            let total = currentDetailItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+            document.getElementById('detailAmount').innerText = '₱' + total.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function saveModalItems() {
+            closeModal('detailModal');
+            logAudit('Modified Requisition Items', 'REQUISITION', `Updated line items for ${document.getElementById('detailModalTitle').innerText}`);
+            showNotificationModal('Purchase Request items have been updated successfully!');
+        }
+
+        // Approval Queue Handling
+        function handleApproval(id, action) {
+            const reqId = id === 1 ? 'REQ-2026-089' : 'REQ-2026-092';
+            const item = document.getElementById(`approval-item-${id}`);
+            if (item) {
+                item.classList.add('opacity-40', 'pointer-events-none');
+                setTimeout(() => {
+                    item.remove();
+                    const container = document.getElementById('approvalsQueueList');
+                    const remaining = container.children.length;
+                    
+                    document.getElementById('approvalQueueBadge').innerText = `${remaining} Pending`;
+                    document.getElementById('kpiPendingNum').innerText = remaining;
+                    document.getElementById('pendingCountBadge').innerText = `${remaining} items`;
+
+                    if (remaining === 0) {
+                        document.getElementById('noApprovalsMessage').classList.remove('hidden');
+                    }
+                    logAudit(`Requisition ${action.toUpperCase()}`, 'APPROVAL', `Action ${action} executed for ${reqId}`);
+                    showNotificationModal(`Requisition #${reqId} has been ${action}.`);
+                }, 300);
+            }
+        }
+
+        function handleQuickReq(e) {
+            e.preventDefault();
+            if (quickReqLines.length === 0) {
+                showNotificationModal('Please add at least one line item to submit requisition.');
+                return;
+            }
+
+            let grandTotal = quickReqLines.reduce((sum, l) => sum + (l.qty * l.unitPrice), 0);
+            const formattedTotal = '₱' + grandTotal.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+            
+            logAudit('Submitted New Requisition', 'REQUISITION', `Submitted requisition with ${quickReqLines.length} item line(s) totaling ${formattedTotal}`);
+            
+            closeModal('quickReqModal');
+            showNotificationModal(`Requisition with ${quickReqLines.length} item line(s) totaling ${formattedTotal} submitted successfully!`);
+            
+            quickReqLines = [{ desc: 'Ergonomic Office Keyboard & Mouse', qty: 2, unitPrice: 3500.00 }];
+        }
+
+        function saveDraftPO() {
+            logAudit('Saved Draft PO', 'PO', 'Created and saved new draft purchase order.');
+            showNotificationModal('Draft Purchase Order saved successfully.');
+        }
+
+        function submitPOForm() {
+            logAudit('Submitted PO For Approval', 'PO', 'Submitted purchase order form for authorization.');
+            showNotificationModal('Purchase Order in PHP submitted successfully and queued for approval!');
+            switchTab('dashboard');
+        }
+
+        window.onload = function() {
+            renderLineItems();
+            renderUsersTable();
+            renderAuditLogs();
+        };
+    </script>
+</body>
+</html>
