@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kamana Sanctuary Resort and Spa - Purchasing Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -110,7 +111,7 @@
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-search"></i>
                     </span>
-                    <input type="text" id="globalSearch" placeholder="Search PO numbers, vendors, requisitions..." 
+                    <input type="text" id="globalSearch" oninput="handleGlobalSearch(this.value)" placeholder="Search PO numbers, vendors, requisitions..." 
                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
                 </div>
             </div>
@@ -138,7 +139,7 @@
         </div>
 
         <!-- Sub Navigation Tabs -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-6 border-t border-slate-100 text-sm overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-6 border-t border-slate-100 text-sm overflow-x-auto scrollbar-none">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="py-3 font-semibold text-brand-600 border-b-2 border-brand-600 whitespace-nowrap flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </button>
@@ -302,16 +303,59 @@
                     </div>
                 </div>
 
-                <!-- Recent Transactions (₱ PHP) -->
+                <!-- Department Spend & Category Breakdown Analytics Graphs -->
                 <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
                     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                         <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> Recent Transactions (PHP ₱)
+                            <i class="fa-solid fa-chart-column text-brand-600"></i> Department Spend Analytics (₱ PHP)
                         </h3>
-                        <button onclick="switchTab('requisitions')" class="text-xs font-semibold text-brand-600 hover:text-brand-800">View All →</button>
+                        <span class="text-xs text-slate-400 font-medium">Q4 Expenditure</span>
                     </div>
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left text-sm">
+                    <div class="relative w-full h-64">
+                        <canvas id="deptSpendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Analytics Grid: Category Breakdown & Spending Trend -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Category Breakdown Doughnut Chart -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-brand-600"></i> Spend by Category Breakdown
+                        </h3>
+                        <span class="text-xs text-slate-400 font-medium">Resort Operations</span>
+                    </div>
+                    <div class="relative w-full h-64 flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Spend vs. Budget Trend Chart -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-brand-600"></i> Monthly Spend vs. Budget Trend
+                        </h3>
+                        <span class="text-xs text-slate-400 font-medium">H2 2026 Trend</span>
+                    </div>
+                    <div class="relative w-full h-64">
+                        <canvas id="monthlyTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions (₱ PHP) -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> Recent Transactions (PHP ₱)
+                    </h3>
+                    <button onclick="switchTab('requisitions')" class="text-xs font-semibold text-brand-600 hover:text-brand-800">View All →</button>
+                </div>
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
                                 <tr>
                                     <th class="p-3 rounded-l-lg">ID / Ref</th>
@@ -1058,6 +1102,23 @@
             renderAuditLogs();
         }
 
+        // Global Search Handler
+        function handleGlobalSearch(query) {
+            const q = query.trim().toLowerCase();
+            if (!q) return;
+
+            // Search Users
+            if (document.getElementById('userSearchInput')) {
+                document.getElementById('userSearchInput').value = query;
+                filterUsersTable();
+            }
+            // Search Audit Logs
+            if (document.getElementById('auditSearchInput')) {
+                document.getElementById('auditSearchInput').value = query;
+                filterAuditLogs();
+            }
+        }
+
         // Authentication Handler
         function handleLogin(e) {
             e.preventDefault();
@@ -1152,8 +1213,8 @@
         }
 
         function filterAuditLogs() {
-            const query = document.getElementById('auditSearchInput').value.toLowerCase();
-            const cat = document.getElementById('auditCategoryFilter').value;
+            const query = (document.getElementById('auditSearchInput')?.value || '').toLowerCase();
+            const cat = document.getElementById('auditCategoryFilter')?.value || 'ALL';
             const rows = document.querySelectorAll('#auditLogsTableBody tr');
 
             rows.forEach((row, index) => {
@@ -1166,8 +1227,8 @@
         }
 
         function clearAuditFilter() {
-            document.getElementById('auditSearchInput').value = '';
-            document.getElementById('auditCategoryFilter').value = 'ALL';
+            if (document.getElementById('auditSearchInput')) document.getElementById('auditSearchInput').value = '';
+            if (document.getElementById('auditCategoryFilter')) document.getElementById('auditCategoryFilter').value = 'ALL';
             filterAuditLogs();
         }
 
@@ -1318,7 +1379,7 @@
         }
 
         function filterUsersTable() {
-            const query = document.getElementById('userSearchInput').value.toLowerCase();
+            const query = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
             const rows = document.querySelectorAll('#usersTableBody tr');
             rows.forEach(row => {
                 const text = row.innerText.toLowerCase();
@@ -1334,6 +1395,7 @@
 
         function renderLineItems() {
             const tbody = document.getElementById('lineItemsTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             let subtotal = 0;
 
@@ -1362,7 +1424,7 @@
         }
 
         function addLineItem() {
-            lineItems.push({ id: Date.now(), desc: 'New Item', qty: 1, price: 0.00 });
+            lineItems.push({ id: Date.now(), desc: 'New Item Requirement', qty: 1, price: 0.00 });
             renderLineItems();
         }
 
@@ -1411,7 +1473,6 @@
             document.getElementById('detailAmount').innerText = amount;
             document.getElementById('detailStatus').innerText = status;
 
-            // Convert initial string description into dynamic array format
             currentDetailItems = [{ id: Date.now(), name: description, price: parseFloat(amount.replace(/[^0-9.-]+/g, '')) || 0, qty: 1 }];
             renderModalItems();
             openModal('detailModal');
@@ -1419,6 +1480,7 @@
 
         function renderModalItems() {
             const container = document.getElementById('detailItemsContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             if (currentDetailItems.length === 0) {
@@ -1527,7 +1589,162 @@
             renderLineItems();
             renderUsersTable();
             renderAuditLogs();
+            initDeptSpendChart();
+            initCategoryChart();
+            initMonthlyTrendChart();
         };
+
+        let deptSpendChart = null;
+        function initDeptSpendChart() {
+            const ctx = document.getElementById('deptSpendChart');
+            if (!ctx) return;
+
+            if (deptSpendChart) {
+                deptSpendChart.destroy();
+            }
+
+            deptSpendChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['IT & Engineering', 'Operations', 'Human Resources', 'Marketing', 'Food & Beverage', 'Housekeeping'],
+                    datasets: [{
+                        label: 'Department Spend (₱)',
+                        data: [3450000, 2810000, 1570000, 920000, 1850000, 640000],
+                        backgroundColor: [
+                            '#6b8e23',
+                            '#10b981',
+                            '#f59e0b',
+                            '#3b82f6',
+                            '#8b5cf6',
+                            '#ec4899'
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw || 0;
+                                    return ' Spend: ₱' + value.toLocaleString('en-PH');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Inter', size: 11 } }
+                        },
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                font: { family: 'Inter', size: 11 },
+                                callback: function(value) {
+                                    return '₱' + (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        let categoryChart = null;
+        function initCategoryChart() {
+            const ctx = document.getElementById('categoryChart');
+            if (!ctx) return;
+            if (categoryChart) categoryChart.destroy();
+
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Food & Beverage', 'IT & Technology', 'Housekeeping & Amenities', 'Facilities & Repairs', 'Office & Admin'],
+                    datasets: [{
+                        data: [3200000, 3450000, 1800000, 2100000, 690000],
+                        backgroundColor: ['#10b981', '#6b8e23', '#3b82f6', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw || 0;
+                                    return ' ' + context.label + ': ₱' + value.toLocaleString('en-PH');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        let monthlyTrendChart = null;
+        function initMonthlyTrendChart() {
+            const ctx = document.getElementById('monthlyTrendChart');
+            if (!ctx) return;
+            if (monthlyTrendChart) monthlyTrendChart.destroy();
+
+            monthlyTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Actual Spend (₱)',
+                            data: [1800000, 2100000, 2400000, 2610000, 2200000, 2800000],
+                            borderColor: '#6b8e23',
+                            backgroundColor: 'rgba(107, 142, 35, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Monthly Budget Limit (₱)',
+                            data: [2500000, 2500000, 2500000, 2700000, 2700000, 3000000],
+                            borderColor: '#cbd5e1',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.dataset.label + ': ₱' + context.raw.toLocaleString('en-PH');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                font: { family: 'Inter', size: 11 },
+                                callback: function(value) { return '₱' + (value / 1000000).toFixed(1) + 'M'; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
