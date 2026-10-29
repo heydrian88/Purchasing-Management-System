@@ -116,8 +116,14 @@
                 </div>
             </div>
 
-            <!-- User Menu & Notifications -->
+            <!-- User Menu, Notifications & Theme Toggle -->
             <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors" title="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-moon text-brand-600"></i>
+                    <span id="themeLabel">Theme: Light</span>
+                </button>
+
                 <button onclick="showNotificationModal('You have 3 system alerts and 2 budget approval reminders.')" class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors" title="Notifications">
                     <i class="fa-regular fa-bell text-lg"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -1583,6 +1589,35 @@
             logAudit('Submitted PO For Approval', 'PO', 'Submitted purchase order form for authorization.');
             showNotificationModal('Purchase Order in PHP submitted successfully and queued for approval!');
             switchTab('dashboard');
+        }
+
+        // Theme Toggle Functionality
+        let isDarkMode = false;
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeLabel = document.getElementById('themeLabel');
+
+            if (isDarkMode) {
+                body.classList.remove('bg-slate-100', 'text-slate-800');
+                body.classList.add('bg-slate-900', 'text-slate-100');
+                if (themeIcon) {
+                    themeIcon.className = 'fa-solid fa-sun text-amber-400';
+                }
+                if (themeLabel) {
+                    themeLabel.innerText = 'Theme: Dark';
+                }
+            } else {
+                body.classList.remove('bg-slate-900', 'text-slate-100');
+                body.classList.add('bg-slate-100', 'text-slate-800');
+                if (themeIcon) {
+                    themeIcon.className = 'fa-solid fa-moon text-brand-600';
+                }
+                if (themeLabel) {
+                    themeLabel.innerText = 'Theme: Light';
+                }
+            }
         }
 
         window.onload = function() {
